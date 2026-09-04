@@ -4,13 +4,8 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Every day at 08:00 UTC
     - cron: "0 8 * * *"
 
-
-# ============================================
-# WORKFLOW PERMISSIONS
-# ============================================
 
 permissions:
   contents: write
@@ -118,8 +113,20 @@ jobs:
             exit 1
           fi
 
+          if [ -z "${{ secrets.INSTAGRAM_ACCESS_TOKEN }}" ]; then
+            echo "ERROR: INSTAGRAM_ACCESS_TOKEN is missing."
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.INSTAGRAM_USER_ID }}" ]; then
+            echo "ERROR: INSTAGRAM_USER_ID is missing."
+            exit 1
+          fi
+
           echo "Gemini API key: OK"
           echo "YouTube OAuth JSON: OK"
+          echo "Instagram access token: OK"
+          echo "Instagram user ID: OK"
 
 
           python - <<'PY'
@@ -161,24 +168,20 @@ jobs:
 
 
       # ============================================
-      # CLEAN OLD OUTPUT
+      # CLEAN OUTPUT
       # ============================================
 
       - name: Clean previous generated files
 
         run: |
 
-          echo "Cleaning old generated files..."
-
           rm -rf output
 
           mkdir -p output
 
-          echo "Output directory ready."
-
 
       # ============================================
-      # GENERATE QUIZ + FRAMES
+      # GENERATE QUIZ
       # ============================================
 
       - name: Generate THINK FAST DAILY Quiz
@@ -193,28 +196,23 @@ jobs:
 
 
       # ============================================
-      # VERIFY GENERATED FRAMES
+      # VERIFY FRAMES
       # ============================================
 
       - name: Check generated frames
 
         run: |
 
-          echo "======================================"
-          echo "CHECKING GENERATED FRAMES"
-          echo "======================================"
-
           FRAME_DIR="output/think_fast_daily_frames"
 
           if [ ! -d "$FRAME_DIR" ]; then
 
-            echo "ERROR: Frame directory not found:"
-            echo "$FRAME_DIR"
+            echo "ERROR: Frame directory not found."
 
-            echo ""
-            echo "Available output files:"
-
-            find output -maxdepth 3 -type f -print || true
+            find output \
+              -maxdepth 3 \
+              -type f \
+              -print || true
 
             exit 1
 
@@ -230,58 +228,31 @@ jobs:
           )
 
 
-          echo "Frame directory:"
-          echo "$FRAME_DIR"
-
-          echo "Frame count:"
-          echo "$FRAME_COUNT"
+          echo "Frame count: $FRAME_COUNT"
 
 
           if [ "$FRAME_COUNT" -lt 10 ]; then
 
-            echo "ERROR: Too few frames generated."
-
-            find "$FRAME_DIR" \
-              -maxdepth 1 \
-              -type f \
-              -print || true
+            echo "ERROR: Too few frames."
 
             exit 1
 
           fi
 
 
-          echo ""
-          echo "First frames:"
-
-          find "$FRAME_DIR" \
-            -maxdepth 1 \
-            -type f \
-            -name "frame_*.png" \
-            | sort \
-            | head -n 5
-
-          echo ""
           echo "Generated frames: OK"
 
 
       # ============================================
-      # CREATE SILENT VIDEO
+      # RENDER VIDEO
       # ============================================
 
       - name: Render silent video
 
         run: |
 
-          echo "======================================"
-          echo "RENDERING 1080x1920 VIDEO"
-          echo "======================================"
-
-
           FRAME_DIR="output/think_fast_daily_frames"
 
-
-          # Detect first frame number automatically.
 
           FIRST_FRAME=$(
             find "$FRAME_DIR" \
@@ -295,9 +266,6 @@ jobs:
           )
 
 
-          echo "First frame number: $FIRST_FRAME"
-
-
           if [ -z "$FIRST_FRAME" ]; then
 
             echo "ERROR: Could not detect first frame."
@@ -305,10 +273,6 @@ jobs:
             exit 1
 
           fi
-
-
-          echo "Rendering frames from:"
-          echo "$FRAME_DIR/frame_%05d.png"
 
 
           ffmpeg \
@@ -325,14 +289,11 @@ jobs:
             output/factverse_silent.mp4
 
 
-          echo ""
-          echo "Silent video created successfully."
-
           ls -lh output/factverse_silent.mp4
 
 
       # ============================================
-      # ADD NATURAL VOICE + MUSIC
+      # AUDIO
       # ============================================
 
       - name: Add natural voice and music
@@ -354,17 +315,9 @@ jobs:
 
         run: |
 
-          echo "======================================"
-          echo "VERIFYING FINAL VIDEO"
-          echo "======================================"
-
-
           if [ ! -f output/think_fast_daily.mp4 ]; then
 
             echo "ERROR: Final video missing."
-
-            echo ""
-            echo "Output files:"
 
             find output \
               -maxdepth 2 \
@@ -377,50 +330,28 @@ jobs:
 
 
           echo "Final video:"
-
           ls -lh output/think_fast_daily.mp4
-
-
-          echo ""
-
-          echo "FFPROBE:"
 
 
           ffprobe \
             -v error \
-            -show_entries \
-            format=duration,size \
-            -show_entries \
-            stream=codec_name,width,height \
+            -show_entries format=duration,size \
+            -show_entries stream=codec_name,width,height \
             -of default=noprint_wrappers=1 \
             output/think_fast_daily.mp4
 
 
       # ============================================
-      # PREPARE VIDEO FOR GITHUB PAGES
+      # PREPARE GITHUB PAGES
       # ============================================
 
-      - name: Prepare Instagram video for GitHub Pages
+      - name: Prepare public video
 
         run: |
-
-          echo "======================================"
-          echo "PREPARING PUBLIC VIDEO URL"
-          echo "======================================"
-
 
           rm -rf pages
 
           mkdir -p pages
-
-
-          if [ ! -f output/think_fast_daily.mp4 ]; then
-
-            echo "ERROR: Video does not exist."
-
-            exit 1
-
-          fi
 
 
           cp \
@@ -428,18 +359,11 @@ jobs:
             pages/think_fast_daily.mp4
 
 
-          echo ""
-          echo "Pages directory:"
-
           ls -lh pages/
 
 
-          echo ""
-          echo "Video prepared successfully."
-
-
       # ============================================
-      # UPLOAD GITHUB PAGES ARTIFACT
+      # UPLOAD PAGES ARTIFACT
       # ============================================
 
       - name: Upload Pages artifact
@@ -451,7 +375,7 @@ jobs:
 
 
       # ============================================
-      # DEPLOY GITHUB PAGES
+      # DEPLOY PAGES
       # ============================================
 
       - name: Deploy to GitHub Pages
@@ -465,67 +389,76 @@ jobs:
 
 
       # ============================================
-      # VERIFY GITHUB PAGES DEPLOYMENT
+      # WAIT FOR PAGES
       # ============================================
 
-      - name: Verify GitHub Pages deployment
+      - name: Wait for public video
 
         run: |
 
-          echo "======================================"
-          echo "VERIFYING GITHUB PAGES"
-          echo "======================================"
-
-
           PAGE_URL="${{ steps.deployment.outputs.page_url }}"
+
+          VIDEO_URL="${PAGE_URL}think_fast_daily.mp4"
+
 
           echo "Pages URL:"
           echo "$PAGE_URL"
 
-
-          VIDEO_URL="${PAGE_URL}think_fast_daily.mp4"
-
           echo ""
-          echo "Public video URL:"
+          echo "Video URL:"
           echo "$VIDEO_URL"
 
 
           echo ""
-          echo "Waiting for Pages deployment..."
-
-          sleep 10
+          echo "Waiting for public video..."
 
 
-          HTTP_STATUS=$(
-            curl \
-              -L \
-              -s \
-              -o /dev/null \
-              -w "%{http_code}" \
-              "$VIDEO_URL"
-          )
+          SUCCESS=0
 
 
-          echo ""
-          echo "Video HTTP status:"
-          echo "$HTTP_STATUS"
+          for i in $(seq 1 12); do
+
+            HTTP_STATUS=$(
+              curl \
+                -L \
+                -s \
+                -o /dev/null \
+                -w "%{http_code}" \
+                "$VIDEO_URL"
+            )
 
 
-          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Attempt $i/12 → HTTP $HTTP_STATUS"
 
-            echo "WARNING: Public video URL is not returning HTTP 200 yet."
 
-            echo "Pages may still be propagating."
+            if [ "$HTTP_STATUS" = "200" ]; then
 
-          else
+              SUCCESS=1
 
-            echo "GitHub Pages video: OK"
+              break
+
+            fi
+
+
+            sleep 10
+
+          done
+
+
+          if [ "$SUCCESS" != "1" ]; then
+
+            echo "ERROR: GitHub Pages video is not publicly reachable."
+
+            exit 1
 
           fi
 
 
+          echo "Public video URL: READY"
+
+
       # ============================================
-      # UPLOAD TO YOUTUBE
+      # YOUTUBE
       # ============================================
 
       - name: Upload to YouTube
@@ -540,7 +473,30 @@ jobs:
 
 
       # ============================================
-      # SAVE QUIZ HISTORY
+      # INSTAGRAM REEL
+      # ============================================
+
+      - name: Upload to Instagram Reel
+
+        env:
+
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+
+          PAGES_VIDEO_URL: ${{ steps.deployment.outputs.page_url }}
+
+        run: |
+
+          echo "======================================"
+          echo "UPLOADING TO INSTAGRAM REEL"
+          echo "======================================"
+
+          python src/upload_instagram.py
+
+
+      # ============================================
+      # SAVE HISTORY
       # ============================================
 
       - name: Save quiz history
@@ -572,7 +528,7 @@ jobs:
 
 
       # ============================================
-      # SAVE VIDEO ARTIFACT
+      # SAVE VIDEO
       # ============================================
 
       - name: Save video artifact
@@ -616,25 +572,22 @@ jobs:
         run: |
 
           echo ""
-
           echo "======================================"
           echo " THINK FAST DAILY SUCCESS"
           echo "======================================"
-
           echo ""
 
-          echo "Quiz generated."
-          echo "Frames generated."
-          echo "Video rendered."
-          echo "Natural voice generated."
-          echo "Music added."
-          echo "Final video verified."
-          echo "GitHub Pages deployment completed."
-          echo "YouTube upload completed."
-          echo "Quiz history saved."
+          echo "Quiz generated              ✅"
+          echo "Frames generated            ✅"
+          echo "Video rendered              ✅"
+          echo "Voice + music               ✅"
+          echo "Video verified              ✅"
+          echo "GitHub Pages                ✅"
+          echo "YouTube upload              ✅"
+          echo "Instagram Reel upload      ✅"
+          echo "Quiz history                ✅"
 
           echo ""
-
           echo "======================================"
 
 
@@ -649,7 +602,6 @@ jobs:
         run: |
 
           echo ""
-
           echo "======================================"
           echo " THINK FAST DAILY AUTOMATION FAILED"
           echo "======================================"
