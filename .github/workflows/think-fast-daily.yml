@@ -363,7 +363,45 @@ jobs:
             -of default=noprint_wrappers=1 \
             output/think_fast_daily.mp4
 
+      # ============================================
+      # PUBLISH VIDEO TO GITHUB PAGES
+      # ============================================
 
+      - name: Prepare Instagram video for GitHub Pages
+
+        run: |
+
+          echo "======================================"
+          echo "PREPARING PUBLIC VIDEO URL"
+          echo "======================================"
+
+          mkdir -p pages
+
+          cp output/think_fast_daily.mp4 pages/think_fast_daily.mp4
+
+          echo "Video copied to Pages directory:"
+
+          ls -lh pages/think_fast_daily.mp4
+
+
+      - name: Upload Pages artifact
+
+        uses: actions/upload-pages-artifact@v3
+
+        with:
+
+          path: pages
+
+
+      - name: Deploy to GitHub Pages
+
+        id: deployment
+
+        uses: actions/deploy-pages@v4
+
+        with:
+
+          artifact_name: github-pages
       # ============================================
       # UPLOAD TO YOUTUBE
       # ============================================
