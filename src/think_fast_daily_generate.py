@@ -34,7 +34,7 @@ if not GEMINI_API_KEY:
 
 MODEL = os.environ.get(
     "GEMINI_MODEL",
-    "gemini-2.5-flash"
+    "gemini-3.6-flash"
 )
 
 
