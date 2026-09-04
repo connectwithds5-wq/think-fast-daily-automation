@@ -1,45 +1,32 @@
 name: THINK FAST DAILY
 
 on:
-
   workflow_dispatch:
 
   schedule:
-
     # Every day at 08:00 UTC
-    # Change this if you want another upload time.
     - cron: "0 8 * * *"
 
-
 permissions:
-
   contents: write
 
-
 jobs:
-
   think-fast-daily:
 
     name: Generate and Upload Quiz Short
 
     runs-on: ubuntu-latest
 
-
     env:
-
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
       GEMINI_MODEL: gemini-3.6-flash
-
       YOUTUBE_OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
 
       YOUTUBE_PRIVACY_STATUS: public
 
       TTS_VOICE: en-US-GuyNeural
 
-
     steps:
-
 
       # ============================================
       # CHECKOUT
@@ -50,7 +37,6 @@ jobs:
         uses: actions/checkout@v4
 
         with:
-
           fetch-depth: 0
 
 
@@ -63,9 +49,7 @@ jobs:
         uses: actions/setup-python@v5
 
         with:
-
           python-version: "3.11"
-
           cache: pip
 
 
@@ -98,33 +82,28 @@ jobs:
 
 
       # ============================================
-      # SECRET CHECK
+      # CHECK SECRETS
       # ============================================
 
       - name: Check secrets
 
         run: |
 
-          echo "Checking configuration..."
+          echo "======================================"
+          echo "CHECKING THINK FAST DAILY CONFIG"
+          echo "======================================"
 
           if [ -z "$GEMINI_API_KEY" ]; then
-
             echo "ERROR: GEMINI_API_KEY is missing."
-
             exit 1
-
           fi
 
           if [ -z "$YOUTUBE_OAUTH_JSON" ]; then
-
             echo "ERROR: YOUTUBE_OAUTH_JSON is missing."
-
             exit 1
-
           fi
 
           echo "Gemini API key: OK"
-
           echo "YouTube OAuth JSON: OK"
 
 
@@ -137,17 +116,10 @@ jobs:
           raw = os.environ["YOUTUBE_OAUTH_JSON"]
 
           try:
-
               data = json.loads(raw)
-
           except Exception:
-
-              print(
-                  "ERROR: YOUTUBE_OAUTH_JSON is invalid JSON."
-              )
-
+              print("ERROR: YOUTUBE_OAUTH_JSON is invalid JSON.")
               sys.exit(1)
-
 
           required = [
               "client_id",
@@ -155,27 +127,38 @@ jobs:
               "refresh_token"
           ]
 
-
           missing = [
-              key
-              for key in required
+              key for key in required
               if not data.get(key)
           ]
 
-
           if missing:
-
               print(
                   "ERROR: Missing OAuth fields:",
                   ", ".join(missing)
               )
-
               sys.exit(1)
-
 
           print("YouTube OAuth fields: OK")
 
           PY
+
+
+      # ============================================
+      # CLEAN OLD OUTPUT
+      # ============================================
+
+      - name: Clean previous generated files
+
+        run: |
+
+          echo "Cleaning old generated files..."
+
+          rm -rf output
+
+          mkdir -p output
+
+          echo "Output directory ready."
 
 
       # ============================================
@@ -186,7 +169,74 @@ jobs:
 
         run: |
 
+          echo "======================================"
+          echo "GENERATING QUIZ"
+          echo "======================================"
+
           python src/think_fast_daily_generate.py
+
+
+      # ============================================
+      # VERIFY GENERATED FRAMES
+      # ============================================
+
+      - name: Check generated frames
+
+        run: |
+
+          echo "======================================"
+          echo "CHECKING GENERATED FRAMES"
+          echo "======================================"
+
+          FRAME_DIR="output/think_fast_daily_frames"
+
+          if [ ! -d "$FRAME_DIR" ]; then
+
+            echo "ERROR: Frame directory not found:"
+            echo "$FRAME_DIR"
+
+            echo ""
+            echo "Available output files:"
+            find output -maxdepth 3 -type f -print || true
+
+            exit 1
+
+          fi
+
+
+          FRAME_COUNT=$(find "$FRAME_DIR" -maxdepth 1 -type f -name "frame_*.png" | wc -l)
+
+
+          echo "Frame directory:"
+          echo "$FRAME_DIR"
+
+          echo "Frame count:"
+          echo "$FRAME_COUNT"
+
+
+          if [ "$FRAME_COUNT" -lt 10 ]; then
+
+            echo "ERROR: Too few frames generated."
+
+            find "$FRAME_DIR" -maxdepth 1 -type f -print || true
+
+            exit 1
+
+          fi
+
+
+          echo ""
+          echo "First frames:"
+
+          find "$FRAME_DIR" \
+            -maxdepth 1 \
+            -type f \
+            -name "frame_*.png" \
+            | sort \
+            | head -n 5
+
+          echo ""
+          echo "Generated frames: OK"
 
 
       # ============================================
@@ -197,12 +247,46 @@ jobs:
 
         run: |
 
-          echo "Rendering 1080x1920 video..."
+          echo "======================================"
+          echo "RENDERING 1080x1920 VIDEO"
+          echo "======================================"
+
+
+          FRAME_DIR="output/think_fast_daily_frames"
+
+
+          # Detect first frame number automatically.
+          FIRST_FRAME=$(find "$FRAME_DIR" \
+            -maxdepth 1 \
+            -type f \
+            -name "frame_*.png" \
+            -printf "%f\n" \
+            | sort \
+            | head -n 1 \
+            | sed -E 's/frame_([0-9]+)\.png/\1/')
+
+
+          echo "First frame number: $FIRST_FRAME"
+
+
+          if [ -z "$FIRST_FRAME" ]; then
+
+            echo "ERROR: Could not detect first frame."
+
+            exit 1
+
+          fi
+
+
+          echo "Rendering frames from:"
+          echo "$FRAME_DIR/frame_%05d.png"
+
 
           ffmpeg \
             -y \
             -framerate 30 \
-            -i output/frames/frame_%05d.png \
+            -start_number "$FIRST_FRAME" \
+            -i "$FRAME_DIR/frame_%05d.png" \
             -c:v libx264 \
             -preset medium \
             -crf 20 \
@@ -212,13 +296,23 @@ jobs:
             output/factverse_silent.mp4
 
 
+          echo ""
+          echo "Silent video created successfully."
+
+          ls -lh output/factverse_silent.mp4
+
+
       # ============================================
-      # ADD VOICE + MUSIC
+      # ADD NATURAL VOICE + MUSIC
       # ============================================
 
       - name: Add natural voice and music
 
         run: |
+
+          echo "======================================"
+          echo "ADDING VOICE + MUSIC"
+          echo "======================================"
 
           python src/add_audio.py
 
@@ -231,9 +325,19 @@ jobs:
 
         run: |
 
+          echo "======================================"
+          echo "VERIFYING FINAL VIDEO"
+          echo "======================================"
+
+
           if [ ! -f output/think_fast_daily.mp4 ]; then
 
             echo "ERROR: Final video missing."
+
+            echo ""
+            echo "Output files:"
+
+            find output -maxdepth 2 -type f -print || true
 
             exit 1
 
@@ -241,8 +345,11 @@ jobs:
 
 
           echo "Final video:"
-
           ls -lh output/think_fast_daily.mp4
+
+
+          echo ""
+          echo "FFPROBE:"
 
 
           ffprobe \
@@ -256,18 +363,22 @@ jobs:
 
 
       # ============================================
-      # UPLOAD YOUTUBE
+      # UPLOAD TO YOUTUBE
       # ============================================
 
       - name: Upload to YouTube
 
         run: |
 
+          echo "======================================"
+          echo "UPLOADING TO YOUTUBE"
+          echo "======================================"
+
           python src/upload_youtube.py
 
 
       # ============================================
-      # SAVE QUESTION HISTORY
+      # SAVE QUIZ HISTORY
       # ============================================
 
       - name: Save quiz history
@@ -291,7 +402,7 @@ jobs:
           else
 
             git commit \
-              -m "Update quiz history"
+              -m "Update THINK FAST DAILY quiz history"
 
             git push
 
@@ -299,7 +410,7 @@ jobs:
 
 
       # ============================================
-      # UPLOAD VIDEO ARTIFACT
+      # SAVE VIDEO ARTIFACT
       # ============================================
 
       - name: Save video artifact
@@ -316,7 +427,7 @@ jobs:
 
 
       # ============================================
-      # UPLOAD METADATA ARTIFACT
+      # SAVE METADATA
       # ============================================
 
       - name: Save metadata artifact
@@ -343,27 +454,40 @@ jobs:
         run: |
 
           echo ""
-
           echo "======================================"
-
           echo " THINK FAST DAILY SUCCESS"
-
+          echo "======================================"
+          echo ""
+          echo "Quiz generated."
+          echo "Frames generated."
+          echo "Video rendered."
+          echo "Natural voice generated."
+          echo "Music added."
+          echo "Final video verified."
+          echo "YouTube upload completed."
+          echo "Quiz history saved."
+          echo ""
           echo "======================================"
 
-          echo ""
 
-          echo "Quiz generated."
+      # ============================================
+      # FAILURE REPORT
+      # ============================================
 
-          echo "Voice generated."
+      - name: Failure report
 
-          echo "Music added."
+        if: failure()
 
-          echo "Video rendered."
-
-          echo "YouTube upload completed."
-
-          echo "Quiz history saved."
+        run: |
 
           echo ""
-
+          echo "======================================"
+          echo " THINK FAST DAILY AUTOMATION FAILED"
+          echo "======================================"
+          echo ""
+          echo "Check the failed step above."
+          echo ""
+          echo "Current output directory:"
+          find output -maxdepth 3 -type f -print 2>/dev/null || true
+          echo ""
           echo "======================================"
