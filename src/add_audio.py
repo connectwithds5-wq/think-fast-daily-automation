@@ -10,11 +10,8 @@ from pathlib import Path
 import edge_tts
 
 
-# ============================================================
-# PATHS
-# ============================================================
-
 ROOT = Path(__file__).resolve().parents[1]
+
 OUTPUT = ROOT / "output"
 
 VIDEO = OUTPUT / "factverse_silent.mp4"
@@ -22,10 +19,14 @@ FINAL_VIDEO = OUTPUT / "think_fast_daily.mp4"
 METADATA = OUTPUT / "metadata.json"
 
 VOICE_DIR = OUTPUT / "voice_segments"
-VOICE_DIR.mkdir(parents=True, exist_ok=True)
 
-MUSIC_WAV = OUTPUT / "music.wav"
+VOICE_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
 VOICE_WAV = OUTPUT / "voice_timed.wav"
+MUSIC_WAV = OUTPUT / "music.wav"
 
 
 # ============================================================
@@ -37,27 +38,27 @@ VOICE = os.environ.get(
     "en-US-GuyNeural"
 )
 
-VIDEO_DURATION = 30.0
+VIDEO_DURATION = 35.0
 
 
 # ============================================================
-# EXACT VISUAL TIMELINE
-#
-# 0-3    Hook
-# 3-15   Question + Options
-# 15-20  Countdown
-# 20-24  Answer
-# 24-28  Explanation
-# 28-30  CTA
+# EXACT TIMELINE
 # ============================================================
 
 SEGMENTS = [
+
     ("01_hook", 3.0),
-    ("02_question_options", 12.0),
+
+    ("02_question_options", 13.0),
+
     ("03_countdown", 5.0),
+
     ("04_answer", 4.0),
-    ("05_explanation", 4.0),
-    ("06_cta", 2.0),
+
+    ("05_explanation", 6.0),
+
+    ("06_cta", 4.0),
+
 ]
 
 
@@ -65,7 +66,10 @@ SEGMENTS = [
 # TTS
 # ============================================================
 
-async def create_voice(text, output_file):
+async def create_voice(
+    text,
+    output_file
+):
 
     communicate = edge_tts.Communicate(
         text=text,
@@ -80,10 +84,12 @@ async def create_voice(text, output_file):
 
 
 # ============================================================
-# GET MEDIA DURATION
+# DURATION
 # ============================================================
 
-def get_duration(file_path):
+def get_duration(
+    file_path
+):
 
     result = subprocess.run(
         [
@@ -107,21 +113,17 @@ def get_duration(file_path):
 
 
 # ============================================================
-# SAFE ATEMPO CHAIN
+# ATEMPO
 # ============================================================
 
-def build_tempo_filter(speed):
-
-    if speed <= 0:
-        raise ValueError(
-            "Invalid audio speed."
-        )
+def build_tempo_filter(
+    speed
+):
 
     filters = []
 
     remaining = speed
 
-    # atempo supports 0.5 -> 2.0
     while remaining > 2.0:
 
         filters.append(
@@ -129,6 +131,7 @@ def build_tempo_filter(speed):
         )
 
         remaining /= 2.0
+
 
     while remaining < 0.5:
 
@@ -138,17 +141,16 @@ def build_tempo_filter(speed):
 
         remaining /= 0.5
 
+
     filters.append(
         f"atempo={remaining:.6f}"
     )
 
-    return ",".join(
-        filters
-    )
+    return ",".join(filters)
 
 
 # ============================================================
-# FIT AUDIO EXACTLY TO VISUAL DURATION
+# FIT AUDIO
 # ============================================================
 
 def fit_audio(
@@ -164,24 +166,24 @@ def fit_audio(
     if source_duration <= 0:
 
         raise RuntimeError(
-            f"Invalid voice duration: {input_file}"
+            "Invalid source audio duration."
         )
 
-    # Example:
-    #
-    # source = 6 sec
-    # target = 3 sec
-    #
-    # speed = 2.0
-    #
+
     speed = (
         source_duration /
         target_duration
     )
 
+
     filters = []
 
-    if abs(speed - 1.0) > 0.002:
+
+    # Only modify speed when necessary.
+
+    if abs(
+        speed - 1.0
+    ) > 0.002:
 
         filters.append(
             build_tempo_filter(
@@ -189,22 +191,22 @@ def fit_audio(
             )
         )
 
-    # If voice is shorter:
-    # add silence.
-    #
-    # If voice is longer:
-    # trim after fitting.
+
     filters.append(
         "apad"
     )
 
+
     filters.append(
-        f"atrim=duration={target_duration:.3f}"
+        f"atrim="
+        f"duration={target_duration:.3f}"
     )
+
 
     filters.append(
         "asetpts=N/SR/TB"
     )
+
 
     subprocess.run(
         [
@@ -237,64 +239,63 @@ def fit_audio(
         text=True
     )
 
-    actual_duration = get_duration(
+
+    actual = get_duration(
         output_file
     )
 
+
     if abs(
-        actual_duration -
+        actual -
         target_duration
     ) > 0.08:
 
         raise RuntimeError(
-            f"Audio timing error: "
-            f"{output_file.name} "
-            f"expected={target_duration:.2f}s "
-            f"actual={actual_duration:.2f}s"
+            f"Timing mismatch: "
+            f"{output_file.name}"
         )
+
 
     return (
         source_duration,
-        actual_duration
+        actual
     )
 
 
 # ============================================================
-# CHECK INPUTS
+# INPUT CHECK
 # ============================================================
-
-if not METADATA.exists():
-
-    raise RuntimeError(
-        "metadata.json is missing."
-    )
-
 
 if not VIDEO.exists():
 
     raise RuntimeError(
-        "factverse_silent.mp4 is missing."
+        "factverse_silent.mp4 missing."
+    )
+
+
+if not METADATA.exists():
+
+    raise RuntimeError(
+        "metadata.json missing."
     )
 
 
 # ============================================================
-# LOAD QUIZ
+# LOAD METADATA
 # ============================================================
 
 with open(
     METADATA,
     "r",
     encoding="utf-8"
-) as file:
+) as f:
 
-    data = json.load(
-        file
-    )
+    data = json.load(f)
 
 
 answer = str(
     data["answer"]
-).strip().upper()
+).upper()
 
 
 answer_text = data[
@@ -303,23 +304,17 @@ answer_text = data[
 
 
 # ============================================================
-# BUILD SYNCHRONIZED SCRIPTS
+# SEGMENT SCRIPTS
 # ============================================================
 
 scripts = {
 
-    # --------------------------------------------------------
-    # 0-3 seconds
-    # --------------------------------------------------------
-
     "01_hook":
 
-        f"{data['hook']}.",
+        f"""
+        {data['hook']}.
+        """,
 
-
-    # --------------------------------------------------------
-    # 3-15 seconds
-    # --------------------------------------------------------
 
     "02_question_options":
 
@@ -342,10 +337,6 @@ scripts = {
         """,
 
 
-    # --------------------------------------------------------
-    # 15-20 seconds
-    # --------------------------------------------------------
-
     "03_countdown":
 
         """
@@ -365,10 +356,6 @@ scripts = {
         """,
 
 
-    # --------------------------------------------------------
-    # 20-24 seconds
-    # --------------------------------------------------------
-
     "04_answer":
 
         f"""
@@ -379,10 +366,6 @@ scripts = {
         """,
 
 
-    # --------------------------------------------------------
-    # 24-28 seconds
-    # --------------------------------------------------------
-
     "05_explanation":
 
         f"""
@@ -392,16 +375,14 @@ scripts = {
         """,
 
 
-    # --------------------------------------------------------
-    # 28-30 seconds
-    # --------------------------------------------------------
-
     "06_cta":
 
         """
-        Comment your answer.
+        Did you get it right?
 
-        Subscribe!
+        Comment A, B, C, or D.
+
+        Subscribe for tomorrow's challenge.
         """
 }
 
@@ -410,17 +391,9 @@ scripts = {
 # START
 # ============================================================
 
-print(
-    "========================================"
-)
-
-print(
-    "THINK FAST DAILY AUDIO ENGINE"
-)
-
-print(
-    "========================================"
-)
+print("========================================")
+print("THINK FAST DAILY V2 AUDIO")
+print("========================================")
 
 print(
     "Voice:",
@@ -428,121 +401,112 @@ print(
 )
 
 print(
-    "Creating synchronized narration..."
+    "Target:",
+    VIDEO_DURATION,
+    "seconds"
 )
 
-print(
-    "========================================"
-)
+print("========================================")
 
 
 # ============================================================
-# REMOVE OLD SEGMENTS
+# CLEAN OLD AUDIO
 # ============================================================
 
-for old_file in VOICE_DIR.glob("*"):
+for old in VOICE_DIR.glob("*"):
 
     try:
-
-        old_file.unlink()
-
+        old.unlink()
     except Exception:
-
         pass
 
 
 # ============================================================
-# GENERATE EACH SEGMENT
+# GENERATE SEGMENTS
 # ============================================================
 
 fitted_files = []
 
 
-for name, target_duration in SEGMENTS:
+for name, duration in SEGMENTS:
 
-    raw_file = (
+    raw = (
         VOICE_DIR /
         f"{name}_raw.mp3"
     )
 
-    fitted_file = (
+    fitted = (
         VOICE_DIR /
         f"{name}.wav"
     )
 
 
     print(
-        f"Generating {name}"
-    )
-
-    print(
-        f"Target duration: "
-        f"{target_duration:.2f}s"
+        f"Generating: {name}"
     )
 
 
     asyncio.run(
         create_voice(
             scripts[name],
-            raw_file
+            raw
         )
     )
 
 
-    source_duration, actual_duration = fit_audio(
-        raw_file,
-        fitted_file,
-        target_duration
+    source, actual = fit_audio(
+        raw,
+        fitted,
+        duration
     )
 
 
     print(
-        f"Source: "
-        f"{source_duration:.2f}s"
-    )
-
-    print(
-        f"Fitted: "
-        f"{actual_duration:.2f}s"
+        f"Source: {source:.2f}s "
+        f"-> Target: {duration:.2f}s "
+        f"-> Final: {actual:.2f}s"
     )
 
 
     fitted_files.append(
-        fitted_file
+        fitted
     )
 
 
 # ============================================================
-# CONCATENATE ALL VOICE SEGMENTS
+# CONCATENATE SEGMENTS
 # ============================================================
 
-concat_inputs = []
+inputs = []
 
-filter_labels = []
+labels = []
+
 
 for index, file_path in enumerate(
     fitted_files
 ):
 
-    concat_inputs.append(
-        "-i"
+    inputs.extend(
+        [
+            "-i",
+            str(file_path)
+        ]
     )
 
-    concat_inputs.append(
-        str(file_path)
-    )
-
-    filter_labels.append(
+    labels.append(
         f"[{index}:a]"
     )
 
 
 concat_filter = (
-    "".join(filter_labels)
+    "".join(labels)
     +
-    f"concat=n={len(fitted_files)}:v=0:a=1,"
-    "aresample=48000,"
-    "asetpts=N/SR/TB[aout]"
+    f"concat="
+    f"n={len(fitted_files)}:"
+    f"v=0:"
+    f"a=1,"
+    f"aresample=48000,"
+    f"asetpts=N/SR/TB[aout]"
 )
 
 
@@ -551,7 +515,7 @@ subprocess.run(
         "ffmpeg",
         "-y",
 
-        *concat_inputs,
+        *inputs,
 
         "-filter_complex",
         concat_filter,
@@ -559,14 +523,14 @@ subprocess.run(
         "-map",
         "[aout]",
 
-        "-c:a",
-        "pcm_s16le",
-
         "-ar",
         "48000",
 
         "-ac",
         "2",
+
+        "-c:a",
+        "pcm_s16le",
 
         str(VOICE_WAV)
     ],
@@ -586,20 +550,12 @@ voice_duration = get_duration(
 
 
 print(
-    "========================================"
-)
-
-print(
-    "Timed narration duration:",
+    "Combined narration:",
     round(
         voice_duration,
         2
     ),
     "seconds"
-)
-
-print(
-    "========================================"
 )
 
 
@@ -609,19 +565,18 @@ if abs(
 ) > 0.08:
 
     raise RuntimeError(
-        f"Voice/video mismatch: "
-        f"{voice_duration:.2f}s vs "
-        f"{VIDEO_DURATION:.2f}s"
+        "VOICE/VIDEO TIMELINE MISMATCH."
     )
 
 
 # ============================================================
-# CREATE SOFT BACKGROUND MUSIC
+# BACKGROUND MUSIC
 # ============================================================
 
 print(
-    "Generating background music..."
+    "Generating subtle background music..."
 )
+
 
 sample_rate = 44100
 
@@ -639,6 +594,7 @@ with wave.open(
         sample_rate
     )
 
+
     total = int(
         VIDEO_DURATION *
         sample_rate
@@ -653,51 +609,44 @@ with wave.open(
         )
 
 
-        freq1 = 110
-
-        freq2 = 164.81
-
-        freq3 = 220
-
-
         value = (
 
             math.sin(
                 2 *
                 math.pi *
-                freq1 *
+                110 *
                 t
             )
             *
-            0.025
+            0.018
 
             +
 
             math.sin(
                 2 *
                 math.pi *
-                freq2 *
+                164.81 *
                 t
             )
             *
-            0.012
+            0.009
 
             +
 
             math.sin(
                 2 *
                 math.pi *
-                freq3 *
+                220 *
                 t
             )
             *
-            0.008
+            0.006
         )
 
 
         fade_in = min(
             1.0,
-            t / 2.0
+            t / 2
         )
 
 
@@ -706,7 +655,7 @@ with wave.open(
             (
                 VIDEO_DURATION -
                 t
-            ) / 2.0
+            ) / 2
         )
 
 
@@ -739,54 +688,37 @@ with wave.open(
 
 
 # ============================================================
-# FINAL AUDIO MIX
+# FINAL MIX
 # ============================================================
 
 print(
-    "Merging voice + music..."
+    "Merging video + narration + music..."
 )
 
 
 filter_complex = (
 
     "[1:a]"
-
     "loudnorm="
     "I=-16:"
     "TP=-1.5:"
     "LRA=11"
-
     "[voice];"
 
     "[2:a]"
-
-    "volume=0.07"
-
+    "volume=0.055"
     "[music];"
 
     "[voice][music]"
-
     "amix="
     "inputs=2:"
     "duration=first:"
-    "dropout_transition=1"
-
-    ","
-
-    f"atrim="
-    f"duration={VIDEO_DURATION:.3f}"
-
-    ","
-
+    "dropout_transition=1,"
+    f"atrim=duration={VIDEO_DURATION:.3f},"
     "aresample=48000"
-
     "[audio]"
 )
 
-
-# ============================================================
-# MERGE VIDEO + AUDIO
-# ============================================================
 
 subprocess.run(
     [
@@ -833,7 +765,7 @@ subprocess.run(
 
 
 # ============================================================
-# FINAL VERIFICATION
+# FINAL CHECK
 # ============================================================
 
 final_duration = get_duration(
@@ -841,17 +773,9 @@ final_duration = get_duration(
 )
 
 
-print(
-    "========================================"
-)
-
-print(
-    "THINK FAST DAILY FINAL VIDEO READY"
-)
-
-print(
-    "========================================"
-)
+print("========================================")
+print("THINK FAST DAILY V2 READY")
+print("========================================")
 
 print(
     "Narration:",
@@ -876,9 +800,7 @@ print(
     FINAL_VIDEO
 )
 
-print(
-    "========================================"
-)
+print("========================================")
 
 
 if abs(
@@ -887,13 +809,12 @@ if abs(
 ) > 0.08:
 
     raise RuntimeError(
-        "Final video is not exactly 30 seconds."
+        "FINAL VIDEO DURATION MISMATCH."
     )
+
 
 print(
     "SYNC CHECK: PASSED"
 )
 
-print(
-    "========================================"
-)
+print("========================================")
