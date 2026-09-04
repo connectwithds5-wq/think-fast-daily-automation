@@ -1,0 +1,369 @@
+name: THINK FAST DAILY
+
+on:
+
+  workflow_dispatch:
+
+  schedule:
+
+    # Every day at 08:00 UTC
+    # Change this if you want another upload time.
+    - cron: "0 8 * * *"
+
+
+permissions:
+
+  contents: write
+
+
+jobs:
+
+  think-fast-daily:
+
+    name: Generate and Upload Quiz Short
+
+    runs-on: ubuntu-latest
+
+
+    env:
+
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      GEMINI_MODEL: gemini-2.5-flash
+
+      YOUTUBE_OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
+
+      YOUTUBE_PRIVACY_STATUS: public
+
+      TTS_VOICE: en-US-GuyNeural
+
+
+    steps:
+
+
+      # ============================================
+      # CHECKOUT
+      # ============================================
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v4
+
+        with:
+
+          fetch-depth: 0
+
+
+      # ============================================
+      # PYTHON
+      # ============================================
+
+      - name: Setup Python
+
+        uses: actions/setup-python@v5
+
+        with:
+
+          python-version: "3.11"
+
+          cache: pip
+
+
+      # ============================================
+      # FFMPEG
+      # ============================================
+
+      - name: Install FFmpeg
+
+        run: |
+
+          sudo apt-get update
+
+          sudo apt-get install -y ffmpeg
+
+          ffmpeg -version | head -n 1
+
+
+      # ============================================
+      # DEPENDENCIES
+      # ============================================
+
+      - name: Install Python dependencies
+
+        run: |
+
+          python -m pip install --upgrade pip
+
+          pip install -r requirements.txt
+
+
+      # ============================================
+      # SECRET CHECK
+      # ============================================
+
+      - name: Check secrets
+
+        run: |
+
+          echo "Checking configuration..."
+
+          if [ -z "$GEMINI_API_KEY" ]; then
+
+            echo "ERROR: GEMINI_API_KEY is missing."
+
+            exit 1
+
+          fi
+
+          if [ -z "$YOUTUBE_OAUTH_JSON" ]; then
+
+            echo "ERROR: YOUTUBE_OAUTH_JSON is missing."
+
+            exit 1
+
+          fi
+
+          echo "Gemini API key: OK"
+
+          echo "YouTube OAuth JSON: OK"
+
+
+          python - <<'PY'
+
+          import os
+          import json
+          import sys
+
+          raw = os.environ["YOUTUBE_OAUTH_JSON"]
+
+          try:
+
+              data = json.loads(raw)
+
+          except Exception:
+
+              print(
+                  "ERROR: YOUTUBE_OAUTH_JSON is invalid JSON."
+              )
+
+              sys.exit(1)
+
+
+          required = [
+              "client_id",
+              "client_secret",
+              "refresh_token"
+          ]
+
+
+          missing = [
+              key
+              for key in required
+              if not data.get(key)
+          ]
+
+
+          if missing:
+
+              print(
+                  "ERROR: Missing OAuth fields:",
+                  ", ".join(missing)
+              )
+
+              sys.exit(1)
+
+
+          print("YouTube OAuth fields: OK")
+
+          PY
+
+
+      # ============================================
+      # GENERATE QUIZ + FRAMES
+      # ============================================
+
+      - name: Generate THINK FAST DAILY Quiz
+
+        run: |
+
+          python src/think_fast_daily_generate.py
+
+
+      # ============================================
+      # CREATE SILENT VIDEO
+      # ============================================
+
+      - name: Render silent video
+
+        run: |
+
+          echo "Rendering 1080x1920 video..."
+
+          ffmpeg \
+            -y \
+            -framerate 30 \
+            -i output/frames/frame_%05d.png \
+            -c:v libx264 \
+            -preset medium \
+            -crf 20 \
+            -pix_fmt yuv420p \
+            -r 30 \
+            -movflags +faststart \
+            output/factverse_silent.mp4
+
+
+      # ============================================
+      # ADD VOICE + MUSIC
+      # ============================================
+
+      - name: Add natural voice and music
+
+        run: |
+
+          python src/add_audio.py
+
+
+      # ============================================
+      # VERIFY FINAL VIDEO
+      # ============================================
+
+      - name: Verify final video
+
+        run: |
+
+          if [ ! -f output/think_fast_daily.mp4 ]; then
+
+            echo "ERROR: Final video missing."
+
+            exit 1
+
+          fi
+
+
+          echo "Final video:"
+
+          ls -lh output/think_fast_daily.mp4
+
+
+          ffprobe \
+            -v error \
+            -show_entries \
+            format=duration,size \
+            -show_entries \
+            stream=codec_name,width,height \
+            -of default=noprint_wrappers=1 \
+            output/think_fast_daily.mp4
+
+
+      # ============================================
+      # UPLOAD YOUTUBE
+      # ============================================
+
+      - name: Upload to YouTube
+
+        run: |
+
+          python src/upload_youtube.py
+
+
+      # ============================================
+      # SAVE QUESTION HISTORY
+      # ============================================
+
+      - name: Save quiz history
+
+        run: |
+
+          git config user.name \
+            "think-fast-daily-bot"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+
+          git add quiz_history.json
+
+
+          if git diff --cached --quiet; then
+
+            echo "No history changes."
+
+          else
+
+            git commit \
+              -m "Update quiz history"
+
+            git push
+
+          fi
+
+
+      # ============================================
+      # UPLOAD VIDEO ARTIFACT
+      # ============================================
+
+      - name: Save video artifact
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: think-fast-daily-video
+
+          path: output/think_fast_daily.mp4
+
+          retention-days: 7
+
+
+      # ============================================
+      # UPLOAD METADATA ARTIFACT
+      # ============================================
+
+      - name: Save metadata artifact
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: think-fast-daily-metadata
+
+          path: output/metadata.json
+
+          retention-days: 7
+
+
+      # ============================================
+      # SUCCESS
+      # ============================================
+
+      - name: Success
+
+        if: success()
+
+        run: |
+
+          echo ""
+
+          echo "======================================"
+
+          echo " THINK FAST DAILY SUCCESS"
+
+          echo "======================================"
+
+          echo ""
+
+          echo "Quiz generated."
+
+          echo "Voice generated."
+
+          echo "Music added."
+
+          echo "Video rendered."
+
+          echo "YouTube upload completed."
+
+          echo "Quiz history saved."
+
+          echo ""
+
+          echo "======================================"
