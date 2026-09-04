@@ -7,26 +7,39 @@ on:
     # Every day at 08:00 UTC
     - cron: "0 8 * * *"
 
+
+# ============================================
+# WORKFLOW PERMISSIONS
+# ============================================
+
 permissions:
   contents: write
   pages: write
   id-token: write
 
+
 jobs:
+
   think-fast-daily:
 
     name: Generate and Upload Quiz Short
 
     runs-on: ubuntu-latest
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_MODEL: gemini-3.6-flash
+
       YOUTUBE_OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
 
       YOUTUBE_PRIVACY_STATUS: public
 
       TTS_VOICE: en-US-GuyNeural
+
 
     steps:
 
@@ -71,7 +84,7 @@ jobs:
 
 
       # ============================================
-      # DEPENDENCIES
+      # PYTHON DEPENDENCIES
       # ============================================
 
       - name: Install Python dependencies
@@ -130,7 +143,8 @@ jobs:
           ]
 
           missing = [
-              key for key in required
+              key
+              for key in required
               if not data.get(key)
           ]
 
@@ -199,6 +213,7 @@ jobs:
 
             echo ""
             echo "Available output files:"
+
             find output -maxdepth 3 -type f -print || true
 
             exit 1
@@ -206,7 +221,13 @@ jobs:
           fi
 
 
-          FRAME_COUNT=$(find "$FRAME_DIR" -maxdepth 1 -type f -name "frame_*.png" | wc -l)
+          FRAME_COUNT=$(
+            find "$FRAME_DIR" \
+              -maxdepth 1 \
+              -type f \
+              -name "frame_*.png" \
+              | wc -l
+          )
 
 
           echo "Frame directory:"
@@ -220,7 +241,10 @@ jobs:
 
             echo "ERROR: Too few frames generated."
 
-            find "$FRAME_DIR" -maxdepth 1 -type f -print || true
+            find "$FRAME_DIR" \
+              -maxdepth 1 \
+              -type f \
+              -print || true
 
             exit 1
 
@@ -258,14 +282,17 @@ jobs:
 
 
           # Detect first frame number automatically.
-          FIRST_FRAME=$(find "$FRAME_DIR" \
-            -maxdepth 1 \
-            -type f \
-            -name "frame_*.png" \
-            -printf "%f\n" \
-            | sort \
-            | head -n 1 \
-            | sed -E 's/frame_([0-9]+)\.png/\1/')
+
+          FIRST_FRAME=$(
+            find "$FRAME_DIR" \
+              -maxdepth 1 \
+              -type f \
+              -name "frame_*.png" \
+              -printf "%f\n" \
+              | sort \
+              | head -n 1 \
+              | sed -E 's/frame_([0-9]+)\.png/\1/'
+          )
 
 
           echo "First frame number: $FIRST_FRAME"
@@ -339,7 +366,10 @@ jobs:
             echo ""
             echo "Output files:"
 
-            find output -maxdepth 2 -type f -print || true
+            find output \
+              -maxdepth 2 \
+              -type f \
+              -print || true
 
             exit 1
 
@@ -347,10 +377,12 @@ jobs:
 
 
           echo "Final video:"
+
           ls -lh output/think_fast_daily.mp4
 
 
           echo ""
+
           echo "FFPROBE:"
 
 
@@ -363,8 +395,9 @@ jobs:
             -of default=noprint_wrappers=1 \
             output/think_fast_daily.mp4
 
+
       # ============================================
-      # PUBLISH VIDEO TO GITHUB PAGES
+      # PREPARE VIDEO FOR GITHUB PAGES
       # ============================================
 
       - name: Prepare Instagram video for GitHub Pages
@@ -375,23 +408,51 @@ jobs:
           echo "PREPARING PUBLIC VIDEO URL"
           echo "======================================"
 
+
+          rm -rf pages
+
           mkdir -p pages
 
-          cp output/think_fast_daily.mp4 pages/think_fast_daily.mp4
 
-          echo "Video copied to Pages directory:"
+          if [ ! -f output/think_fast_daily.mp4 ]; then
 
-          ls -lh pages/think_fast_daily.mp4
+            echo "ERROR: Video does not exist."
 
+            exit 1
+
+          fi
+
+
+          cp \
+            output/think_fast_daily.mp4 \
+            pages/think_fast_daily.mp4
+
+
+          echo ""
+          echo "Pages directory:"
+
+          ls -lh pages/
+
+
+          echo ""
+          echo "Video prepared successfully."
+
+
+      # ============================================
+      # UPLOAD GITHUB PAGES ARTIFACT
+      # ============================================
 
       - name: Upload Pages artifact
 
         uses: actions/upload-pages-artifact@v3
 
         with:
-
           path: pages
 
+
+      # ============================================
+      # DEPLOY GITHUB PAGES
+      # ============================================
 
       - name: Deploy to GitHub Pages
 
@@ -400,8 +461,69 @@ jobs:
         uses: actions/deploy-pages@v4
 
         with:
-
           artifact_name: github-pages
+
+
+      # ============================================
+      # VERIFY GITHUB PAGES DEPLOYMENT
+      # ============================================
+
+      - name: Verify GitHub Pages deployment
+
+        run: |
+
+          echo "======================================"
+          echo "VERIFYING GITHUB PAGES"
+          echo "======================================"
+
+
+          PAGE_URL="${{ steps.deployment.outputs.page_url }}"
+
+          echo "Pages URL:"
+          echo "$PAGE_URL"
+
+
+          VIDEO_URL="${PAGE_URL}think_fast_daily.mp4"
+
+          echo ""
+          echo "Public video URL:"
+          echo "$VIDEO_URL"
+
+
+          echo ""
+          echo "Waiting for Pages deployment..."
+
+          sleep 10
+
+
+          HTTP_STATUS=$(
+            curl \
+              -L \
+              -s \
+              -o /dev/null \
+              -w "%{http_code}" \
+              "$VIDEO_URL"
+          )
+
+
+          echo ""
+          echo "Video HTTP status:"
+          echo "$HTTP_STATUS"
+
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+
+            echo "WARNING: Public video URL is not returning HTTP 200 yet."
+
+            echo "Pages may still be propagating."
+
+          else
+
+            echo "GitHub Pages video: OK"
+
+          fi
+
+
       # ============================================
       # UPLOAD TO YOUTUBE
       # ============================================
@@ -494,19 +616,25 @@ jobs:
         run: |
 
           echo ""
+
           echo "======================================"
           echo " THINK FAST DAILY SUCCESS"
           echo "======================================"
+
           echo ""
+
           echo "Quiz generated."
           echo "Frames generated."
           echo "Video rendered."
           echo "Natural voice generated."
           echo "Music added."
           echo "Final video verified."
+          echo "GitHub Pages deployment completed."
           echo "YouTube upload completed."
           echo "Quiz history saved."
+
           echo ""
+
           echo "======================================"
 
 
@@ -521,13 +649,24 @@ jobs:
         run: |
 
           echo ""
+
           echo "======================================"
           echo " THINK FAST DAILY AUTOMATION FAILED"
           echo "======================================"
+
           echo ""
+
           echo "Check the failed step above."
+
           echo ""
+
           echo "Current output directory:"
-          find output -maxdepth 3 -type f -print 2>/dev/null || true
+
+          find output \
+            -maxdepth 3 \
+            -type f \
+            -print 2>/dev/null || true
+
           echo ""
+
           echo "======================================"
