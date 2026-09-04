@@ -9,10 +9,6 @@ from google import genai
 from google.genai import types
 
 
-# ============================================================
-# PATHS
-# ============================================================
-
 ROOT = Path(__file__).resolve().parents[1]
 
 OUTPUT = ROOT / "output"
@@ -21,15 +17,8 @@ FRAMES = OUTPUT / "think_fast_daily_frames"
 SILENT_VIDEO = OUTPUT / "factverse_silent.mp4"
 METADATA = OUTPUT / "metadata.json"
 
-OUTPUT.mkdir(
-    parents=True,
-    exist_ok=True
-)
-
-FRAMES.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT.mkdir(parents=True, exist_ok=True)
+FRAMES.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
@@ -38,11 +27,9 @@ FRAMES.mkdir(
 
 WIDTH = 1080
 HEIGHT = 1920
-
 FPS = 30
 
-DURATION = 30
-
+DURATION = 35
 TOTAL_FRAMES = FPS * DURATION
 
 
@@ -50,20 +37,12 @@ TOTAL_FRAMES = FPS * DURATION
 # GEMINI
 # ============================================================
 
-api_key = os.environ.get(
-    "GEMINI_API_KEY"
-)
+api_key = os.environ.get("GEMINI_API_KEY")
 
 if not api_key:
-    raise RuntimeError(
-        "GEMINI_API_KEY GitHub Secret is missing."
-    )
+    raise RuntimeError("GEMINI_API_KEY is missing.")
 
-
-client = genai.Client(
-    api_key=api_key
-)
-
+client = genai.Client(api_key=api_key)
 
 MODEL = os.environ.get(
     "GEMINI_MODEL",
@@ -76,104 +55,100 @@ MODEL = os.environ.get(
 # ============================================================
 
 categories = [
-    "visual brain puzzles",
-    "tricky logic questions",
-    "guess the object",
+    "visual brain puzzle",
+    "tricky logic puzzle",
     "guess the animal",
+    "guess the object",
     "guess the country",
-    "guess the famous place",
+    "geography challenge",
     "emoji guessing challenge",
-    "spot the pattern",
-    "number puzzle",
+    "number pattern puzzle",
+    "shape pattern puzzle",
     "quick IQ challenge",
-    "optical illusion style puzzle",
-    "common knowledge trick question",
     "science brain teaser",
+    "space guessing challenge",
     "history guessing challenge",
-    "geography challenge"
+    "common knowledge trick question"
 ]
 
-
-category = random.choice(
-    categories
-)
+category = random.choice(categories)
 
 
 # ============================================================
-# AI PROMPT
+# AI QUIZ GENERATION
 # ============================================================
 
 prompt = f"""
-You are the expert content creator for a viral YouTube Shorts channel
-called THINK FAST DAILY.
+You create viral but accurate YouTube Shorts for
+THINK FAST DAILY.
 
-Create ONE highly engaging 30-second brain quiz / guessing challenge.
+Create ONE highly engaging brain quiz / guessing challenge.
 
 Category:
 {category}
 
-The goal is maximum viewer retention.
+The video is 35 seconds.
 
-The viewer should:
-1. Immediately become curious.
-2. Read the question.
-3. Choose between four options.
-4. Think during a countdown.
-5. Wait for the answer reveal.
-6. Learn something interesting.
-7. Want to comment and subscribe.
+TIMELINE:
 
-IMPORTANT FACTUAL RULES:
-
-- Never invent facts.
-- Never invent statistics.
-- Never use fake scientific claims.
-- Never use misleading information.
-- If the question has a factual answer, make sure the answer is correct.
-- The answer MUST exactly match one of A, B, C or D.
-- Avoid politics.
-- Avoid medical advice.
-- Avoid dangerous instructions.
-- Avoid graphic content.
-- Avoid adult content.
-- Avoid copyrighted characters as the main subject.
-- Make the challenge suitable for a general audience.
-- Keep the language simple and natural.
-- Use English.
-
-TIMING:
-
-0–3 seconds:
+0-3 seconds:
 POWERFUL HOOK.
 
-3–15 seconds:
-QUESTION + FOUR OPTIONS.
+3-16 seconds:
+QUESTION + FOUR OPTIONS + VISUAL CLUE.
 
-15–20 seconds:
-THINKING / COUNTDOWN.
+16-21 seconds:
+5 SECOND THINKING COUNTDOWN.
 
-20–24 seconds:
+21-25 seconds:
 ANSWER REVEAL.
 
-24–28 seconds:
+25-31 seconds:
 SHORT EXPLANATION.
 
-28–30 seconds:
-CTA.
+31-35 seconds:
+NATURAL CTA.
 
-VERY IMPORTANT:
+IMPORTANT:
 
-The answer must NOT be revealed inside the question,
-options, hook or explanation before the answer section.
+The question must be easy enough to understand quickly.
+
+The answer must be exactly one of A/B/C/D.
+
+Do not reveal the answer in the hook.
+
+Do not reveal the answer in the visual before the reveal.
+
+Use simple natural English.
+
+No politics.
+No medical advice.
+No dangerous content.
+No adult content.
+No graphic content.
+
+Create a visual concept that matches the question.
+
+For example:
+
+animal -> animal silhouette / clues
+country -> globe / map clue
+object -> mystery object silhouette
+number -> animated number sequence
+pattern -> geometric pattern
+space -> planet / stars
+logic -> puzzle blocks
+emoji -> emoji clue
+science -> simple science visual
 
 Return ONLY valid JSON.
 
-Use exactly this structure:
+Use EXACTLY this structure:
 
 {{
   "hook": "Short curiosity hook, maximum 10 words",
 
-  "question": "The actual quiz question, maximum 20 words",
+  "question": "Quiz question, maximum 20 words",
 
   "options": {{
     "A": "Option A",
@@ -184,7 +159,11 @@ Use exactly this structure:
 
   "answer": "A",
 
-  "explanation": "Short factual explanation, maximum 25 words",
+  "explanation": "Short factual explanation, maximum 30 words",
+
+  "visual_type": "animal",
+
+  "visual_prompt": "Describe a simple visual clue for this question without revealing the answer",
 
   "title": "SEO optimized YouTube Shorts title",
 
@@ -195,8 +174,8 @@ Use exactly this structure:
     "iq quiz",
     "guess the answer",
     "brain challenge",
-    "trivia",
     "puzzle",
+    "trivia",
     "think fast daily",
     "shorts"
   ],
@@ -206,8 +185,8 @@ Use exactly this structure:
     "#iqquiz",
     "#guess",
     "#brainchallenge",
-    "#trivia",
     "#puzzle",
+    "#trivia",
     "#shorts",
     "#thinkfastdaily"
   ]
@@ -215,12 +194,9 @@ Use exactly this structure:
 """
 
 
-# ============================================================
-# GENERATE QUIZ
-# ============================================================
-
 print("========================================")
-print("Generating THINK FAST DAILY quiz...")
+print("THINK FAST DAILY V2")
+print("Generating quiz...")
 print("Category:", category)
 print("Model:", MODEL)
 print("========================================")
@@ -234,13 +210,7 @@ response = client.models.generate_content(
     )
 )
 
-
 text = response.text.strip()
-
-
-# ============================================================
-# CLEAN JSON
-# ============================================================
 
 if text.startswith("```json"):
     text = text[7:]
@@ -251,74 +221,54 @@ if text.startswith("```"):
 if text.endswith("```"):
     text = text[:-3]
 
-
-data = json.loads(
-    text.strip()
-)
+data = json.loads(text.strip())
 
 
 # ============================================================
-# VALIDATE DATA
+# VALIDATION
 # ============================================================
 
-required_fields = [
+required = [
     "hook",
     "question",
     "options",
     "answer",
     "explanation",
+    "visual_type",
+    "visual_prompt",
     "title",
     "description",
     "keywords",
     "hashtags"
 ]
 
-
-for field in required_fields:
-
+for field in required:
     if field not in data:
-
         raise RuntimeError(
-            f"Missing quiz field: {field}"
+            f"Missing field: {field}"
         )
 
 
-# Validate options
-
-required_options = [
-    "A",
-    "B",
-    "C",
-    "D"
-]
-
-
-for option in required_options:
-
+for option in ["A", "B", "C", "D"]:
     if option not in data["options"]:
-
         raise RuntimeError(
             f"Missing option: {option}"
         )
 
 
-# Validate answer
+data["answer"] = str(
+    data["answer"]
+).upper().strip()
 
-if data["answer"] not in required_options:
 
+if data["answer"] not in ["A", "B", "C", "D"]:
     raise RuntimeError(
-        "Invalid answer. Must be A, B, C or D."
+        "Answer must be A, B, C or D."
     )
 
 
-# ============================================================
-# CHANNEL DATA
-# ============================================================
-
 data["channel"] = "THINK FAST DAILY"
-
 data["category"] = category
-
 data["duration"] = DURATION
 
 
@@ -330,17 +280,17 @@ with open(
     METADATA,
     "w",
     encoding="utf-8"
-) as file:
+) as f:
 
     json.dump(
         data,
-        file,
+        f,
         ensure_ascii=False,
         indent=2
     )
 
 
-print("Quiz metadata saved.")
+print("Metadata saved.")
 
 
 # ============================================================
@@ -357,77 +307,61 @@ FONT_REGULAR = (
     "DejaVuSans.ttf"
 )
 
+font_brand = ImageFont.truetype(
+    FONT_BOLD, 38
+)
 
 font_hook = ImageFont.truetype(
-    FONT_BOLD,
-    72
+    FONT_BOLD, 70
 )
 
 font_question = ImageFont.truetype(
-    FONT_BOLD,
-    55
+    FONT_BOLD, 52
 )
 
 font_option = ImageFont.truetype(
-    FONT_BOLD,
-    46
+    FONT_BOLD, 43
 )
 
 font_answer = ImageFont.truetype(
-    FONT_BOLD,
-    68
+    FONT_BOLD, 70
 )
 
 font_explanation = ImageFont.truetype(
-    FONT_BOLD,
-    46
+    FONT_BOLD, 44
 )
 
 font_countdown = ImageFont.truetype(
-    FONT_BOLD,
-    130
-)
-
-font_brand = ImageFont.truetype(
-    FONT_BOLD,
-    38
+    FONT_BOLD, 150
 )
 
 font_small = ImageFont.truetype(
-    FONT_REGULAR,
-    32
+    FONT_REGULAR, 31
 )
 
 
 # ============================================================
-# TEXT WRAPPING
+# HELPERS
 # ============================================================
 
-def wrap_text(
-    text,
-    font,
-    max_width
-):
+def wrap_text(text, font, max_width):
 
     dummy = Image.new(
         "RGB",
         (WIDTH, HEIGHT)
     )
 
-    draw = ImageDraw.Draw(
-        dummy
-    )
+    draw = ImageDraw.Draw(dummy)
 
-    words = text.split()
+    words = str(text).split()
 
     lines = []
-
     current = ""
 
     for word in words:
 
         test = (
-            f"{current} {word}"
+            current + " " + word
             if current
             else word
         )
@@ -438,121 +372,43 @@ def wrap_text(
             font=font
         )
 
-        width = (
-            box[2] -
-            box[0]
-        )
-
-        if width <= max_width:
-
+        if box[2] - box[0] <= max_width:
             current = test
 
         else:
 
             if current:
-
-                lines.append(
-                    current
-                )
+                lines.append(current)
 
             current = word
 
-
     if current:
-
-        lines.append(
-            current
-        )
-
+        lines.append(current)
 
     return lines
 
 
-# ============================================================
-# PREPARE TEXT
-# ============================================================
-
-hook_lines = wrap_text(
-    data["hook"],
-    font_hook,
-    850
-)
-
-
-question_lines = wrap_text(
-    data["question"],
-    font_question,
-    850
-)
-
-
-explanation_lines = wrap_text(
-    data["explanation"],
-    font_explanation,
-    850
-)
-
-
-# ============================================================
-# STAR FIELD
-# ============================================================
-
-random.seed(
-    2026
-)
-
-stars = []
-
-for _ in range(130):
-
-    stars.append(
-        (
-            random.randint(
-                20,
-                WIDTH - 20
-            ),
-
-            random.randint(
-                20,
-                HEIGHT - 20
-            ),
-
-            random.randint(
-                1,
-                4
-            )
-        )
-    )
-
-
-# ============================================================
-# DRAW CENTERED TEXT
-# ============================================================
-
-def draw_centered(
+def centered_text(
     draw,
-    lines,
+    text,
     font,
-    center_y,
-    spacing
+    y,
+    max_width=850
 ):
 
-    if not lines:
-
-        return
-
-
-    total_height = (
-        len(lines) *
-        spacing
+    lines = wrap_text(
+        text,
+        font,
+        max_width
     )
 
-
-    y = (
-        center_y -
-        total_height // 2
+    spacing = int(
+        font.size * 1.35
     )
 
+    total = len(lines) * spacing
+
+    start = y - total // 2
 
     for line in lines:
 
@@ -562,61 +418,318 @@ def draw_centered(
             font=font
         )
 
-        width = (
-            box[2] -
-            box[0]
-        )
+        width = box[2] - box[0]
 
-
-        x = (
-            WIDTH -
-            width
-        ) // 2
-
-
-        # Shadow
+        x = (WIDTH - width) // 2
 
         draw.text(
-            (
-                x + 5,
-                y + 6
-            ),
-
+            (x + 4, start + 5),
             line,
-
             font=font,
-
-            fill=(
-                0,
-                0,
-                0
-            )
+            fill=(0, 0, 0)
         )
-
 
         draw.text(
-            (
-                x,
-                y
-            ),
-
+            (x, start),
             line,
-
             font=font,
-
-            fill=(
-                245,
-                245,
-                250
-            )
+            fill=(245, 245, 250)
         )
 
+        start += spacing
 
-        y += spacing
+
+def brand(draw):
+
+    text = "THINK FAST DAILY"
+
+    box = draw.textbbox(
+        (0, 0),
+        text,
+        font=font_brand
+    )
+
+    width = box[2] - box[0]
+
+    draw.text(
+        (
+            (WIDTH - width) // 2,
+            75
+        ),
+        text,
+        font=font_brand,
+        fill=(245, 200, 80)
+    )
+
+
+def label(draw, text):
+
+    box = draw.textbbox(
+        (0, 0),
+        text,
+        font=font_small
+    )
+
+    width = box[2] - box[0]
+
+    draw.text(
+        (
+            (WIDTH - width) // 2,
+            235
+        ),
+        text,
+        font=font_small,
+        fill=(175, 185, 210)
+    )
 
 
 # ============================================================
-# DRAW OPTION
+# VISUAL CLUE
+# ============================================================
+
+def draw_visual_clue(
+    draw,
+    visual_type,
+    frame_number
+):
+
+    center_x = WIDTH // 2
+    center_y = 690
+
+    pulse = int(
+        10 *
+        abs(
+            ((frame_number % 60) - 30)
+            / 30
+        )
+    )
+
+    # Generic glowing brain/puzzle style visual
+    # designed not to reveal the answer.
+
+    if visual_type == "animal":
+
+        # mystery animal silhouette
+
+        draw.ellipse(
+            (
+                center_x - 135,
+                center_y - 110 - pulse,
+                center_x + 135,
+                center_y + 110 + pulse
+            ),
+            outline=(80, 130, 230),
+            width=10
+        )
+
+        draw.polygon(
+            [
+                (center_x - 100, center_y - 70),
+                (center_x - 165, center_y - 160),
+                (center_x - 45, center_y - 110)
+            ],
+            outline=(245, 200, 80)
+        )
+
+        draw.polygon(
+            [
+                (center_x + 100, center_y - 70),
+                (center_x + 165, center_y - 160),
+                (center_x + 45, center_y - 110)
+            ],
+            outline=(245, 200, 80)
+        )
+
+        draw.ellipse(
+            (
+                center_x - 15,
+                center_y - 20,
+                center_x + 15,
+                center_y + 10
+            ),
+            fill=(245, 200, 80)
+        )
+
+    elif visual_type == "country":
+
+        # Globe
+
+        r = 145 + pulse
+
+        draw.ellipse(
+            (
+                center_x - r,
+                center_y - r,
+                center_x + r,
+                center_y + r
+            ),
+            outline=(80, 150, 245),
+            width=10
+        )
+
+        draw.arc(
+            (
+                center_x - r,
+                center_y - r,
+                center_x + r,
+                center_y + r
+            ),
+            70,
+            290,
+            fill=(245, 200, 80),
+            width=6
+        )
+
+        draw.line(
+            (
+                center_x - r,
+                center_y,
+                center_x + r,
+                center_y
+            ),
+            fill=(80, 150, 245),
+            width=5
+        )
+
+    elif visual_type in [
+        "number",
+        "number pattern"
+    ]:
+
+        centered_text(
+            draw,
+            "?  ?  ?  ?",
+            font_answer,
+            center_y
+        )
+
+    elif visual_type in [
+        "pattern",
+        "shape pattern",
+        "logic"
+    ]:
+
+        size = 90
+
+        shapes = [
+            "circle",
+            "square",
+            "triangle",
+            "circle"
+        ]
+
+        for i, shape in enumerate(shapes):
+
+            x = (
+                center_x -
+                225 +
+                i * 150
+            )
+
+            y = center_y
+
+            if shape == "circle":
+
+                draw.ellipse(
+                    (
+                        x - size // 2,
+                        y - size // 2,
+                        x + size // 2,
+                        y + size // 2
+                    ),
+                    outline=(80, 150, 245),
+                    width=8
+                )
+
+            elif shape == "square":
+
+                draw.rectangle(
+                    (
+                        x - size // 2,
+                        y - size // 2,
+                        x + size // 2,
+                        y + size // 2
+                    ),
+                    outline=(245, 200, 80),
+                    width=8
+                )
+
+            else:
+
+                draw.polygon(
+                    [
+                        (x, y - size // 2),
+                        (x - size // 2, y + size // 2),
+                        (x + size // 2, y + size // 2)
+                    ],
+                    outline=(80, 150, 245),
+                    width=8
+                )
+
+    elif visual_type == "space":
+
+        r = 115 + pulse
+
+        draw.ellipse(
+            (
+                center_x - r,
+                center_y - r,
+                center_x + r,
+                center_y + r
+            ),
+            outline=(80, 150, 245),
+            width=10
+        )
+
+        draw.arc(
+            (
+                center_x - 190,
+                center_y - 60,
+                center_x + 190,
+                center_y + 60
+            ),
+            0,
+            360,
+            fill=(245, 200, 80),
+            width=6
+        )
+
+    elif visual_type == "emoji":
+
+        centered_text(
+            draw,
+            "❓  ❓  ❓",
+            font_answer,
+            center_y
+        )
+
+    else:
+
+        # Default mystery puzzle visual
+
+        r = 125 + pulse
+
+        draw.ellipse(
+            (
+                center_x - r,
+                center_y - r,
+                center_x + r,
+                center_y + r
+            ),
+            outline=(80, 150, 245),
+            width=10
+        )
+
+        centered_text(
+            draw,
+            "?",
+            font_countdown,
+            center_y
+        )
+
+
+# ============================================================
+# OPTIONS
 # ============================================================
 
 def draw_option(
@@ -626,704 +739,312 @@ def draw_option(
     y
 ):
 
-    box_x1 = 110
-    box_x2 = WIDTH - 110
-
-    box_y1 = y
-    box_y2 = y + 115
-
-
-    # Option box
-
     draw.rounded_rectangle(
         (
-            box_x1,
-            box_y1,
-            box_x2,
-            box_y2
-        ),
-
-        radius=28,
-
-        fill=(
-            18,
-            23,
-            48
-        ),
-
-        outline=(
-            70,
             80,
-            125
+            y,
+            WIDTH - 80,
+            y + 105
         ),
-
+        radius=25,
+        fill=(18, 24, 52),
+        outline=(65, 80, 125),
         width=3
     )
 
-
-    # Letter circle
-
-    circle_x = 175
-    circle_y = (
-        y + 57
-    )
-
+    cx = 145
+    cy = y + 52
 
     draw.ellipse(
         (
-            circle_x - 32,
-            circle_y - 32,
-            circle_x + 32,
-            circle_y + 32
+            cx - 28,
+            cy - 28,
+            cx + 28,
+            cy + 28
         ),
-
-        fill=(
-            245,
-            200,
-            80
-        )
+        fill=(245, 200, 80)
     )
 
-
-    letter_box = draw.textbbox(
+    centered_letter = draw.textbbox(
         (0, 0),
         letter,
         font=font_option
     )
 
-
-    letter_width = (
-        letter_box[2] -
-        letter_box[0]
-    )
-
-
-    letter_height = (
-        letter_box[3] -
-        letter_box[1]
-    )
-
+    lw = centered_letter[2] - centered_letter[0]
+    lh = centered_letter[3] - centered_letter[1]
 
     draw.text(
         (
-            circle_x -
-            letter_width // 2,
-
-            circle_y -
-            letter_height // 2 -
-            5
+            cx - lw // 2,
+            cy - lh // 2 - 4
         ),
-
         letter,
-
         font=font_option,
-
-        fill=(
-            8,
-            10,
-            25
-        )
+        fill=(8, 10, 25)
     )
 
-
-    # Option text
-
-    option_lines = wrap_text(
+    lines = wrap_text(
         text,
         font_option,
-        650
+        700
     )
 
-
-    if len(option_lines) > 2:
-
-        option_lines = option_lines[:2]
-
-
-    start_y = (
-        y + 25
-    )
-
-
-    for index, line in enumerate(
-        option_lines
-    ):
+    for i, line in enumerate(lines[:2]):
 
         draw.text(
             (
-                245,
-                start_y +
-                index * 50
+                205,
+                y + 18 + i * 45
             ),
-
             line,
-
             font=font_option,
-
-            fill=(
-                245,
-                245,
-                250
-            )
+            fill=(245, 245, 250)
         )
 
 
 # ============================================================
-# DRAW BRAND
+# FRAME
 # ============================================================
 
-def draw_brand(
-    draw
-):
-
-    brand = "THINK FAST DAILY"
-
-
-    box = draw.textbbox(
-        (0, 0),
-        brand,
-        font=font_brand
-    )
-
-
-    width = (
-        box[2] -
-        box[0]
-    )
-
-
-    draw.text(
-        (
-            (WIDTH - width) // 2,
-            90
-        ),
-
-        brand,
-
-        font=font_brand,
-
-        fill=(
-            245,
-            200,
-            80
-        )
-    )
-
-
-# ============================================================
-# DRAW LABEL
-# ============================================================
-
-def draw_label(
-    draw,
-    text
-):
-
-    box = draw.textbbox(
-        (0, 0),
-        text,
-        font=font_small
-    )
-
-
-    width = (
-        box[2] -
-        box[0]
-    )
-
-
-    draw.text(
-        (
-            (WIDTH - width) // 2,
-            260
-        ),
-
-        text,
-
-        font=font_small,
-
-        fill=(
-            180,
-            185,
-            205
-        )
-    )
-
-
-# ============================================================
-# CREATE FRAME
-# ============================================================
-
-def create_frame(
-    frame_number
-):
+def create_frame(frame_number):
 
     img = Image.new(
         "RGB",
-        (
-            WIDTH,
-            HEIGHT
-        ),
-
-        (
-            8,
-            10,
-            25
-        )
+        (WIDTH, HEIGHT),
+        (7, 10, 26)
     )
 
+    draw = ImageDraw.Draw(img)
 
-    draw = ImageDraw.Draw(
-        img
-    )
+    # background particles
 
+    random.seed(2026)
 
-    # --------------------------------------------------------
-    # Animated stars
-    # --------------------------------------------------------
+    for _ in range(100):
 
-    for x, y, radius in stars:
-
-        yy = int(
-            (
-                y +
-                frame_number * 0.35
-            )
-            % HEIGHT
+        x = random.randint(
+            20,
+            WIDTH - 20
         )
 
+        y = random.randint(
+            20,
+            HEIGHT - 20
+        )
+
+        radius = random.randint(
+            1,
+            3
+        )
 
         draw.ellipse(
             (
                 x - radius,
-                yy - radius,
+                y - radius,
                 x + radius,
-                yy + radius
+                y + radius
             ),
-
-            fill=(
-                90,
-                95,
-                125
-            )
+            fill=(70, 80, 115)
         )
 
-
-    # --------------------------------------------------------
-    # Brand
-    # --------------------------------------------------------
-
-    draw_brand(
-        draw
-    )
-
+    brand(draw)
 
     # ========================================================
-    # 0–3 SEC
-    # HOOK
+    # 0-3 HOOK
     # ========================================================
 
     if frame_number < FPS * 3:
 
-        draw_label(
+        label(
             draw,
-            "🧠 QUICK BRAIN CHALLENGE"
+            "🧠 DAILY BRAIN CHALLENGE"
         )
 
-
-        draw_centered(
+        centered_text(
             draw,
-            hook_lines,
+            data["hook"],
             font_hook,
-            850,
-            100
+            820
         )
 
-
-        # Small instruction
-
-        instruction = (
-            "GET READY..."
-        )
-
-
-        box = draw.textbbox(
-            (0, 0),
-            instruction,
-            font=font_small
-        )
-
-
-        width = (
-            box[2] -
-            box[0]
-        )
-
-
-        draw.text(
-            (
-                (WIDTH - width) // 2,
-                1160
-            ),
-
-            instruction,
-
-            font=font_small,
-
-            fill=(
-                180,
-                185,
-                205
-            )
+        centered_text(
+            draw,
+            "CAN YOU GET IT RIGHT?",
+            font_small,
+            1080
         )
 
 
     # ========================================================
-    # 3–15 SEC
-    # QUESTION + OPTIONS
+    # 3-16 QUESTION + VISUAL + OPTIONS
     # ========================================================
 
-    elif frame_number < FPS * 15:
+    elif frame_number < FPS * 16:
 
-        draw_label(
+        label(
             draw,
-            "CAN YOU GET IT RIGHT?"
+            "THINK FAST!"
         )
 
-
-        draw_centered(
+        centered_text(
             draw,
-            question_lines,
+            data["question"],
             font_question,
-            500,
-            72
+            450,
+            900
         )
 
-
-        option_y = 850
+        draw_visual_clue(
+            draw,
+            str(
+                data["visual_type"]
+            ).lower(),
+            frame_number
+        )
 
         draw_option(
             draw,
             "A",
             data["options"]["A"],
-            option_y
+            1080
         )
-
 
         draw_option(
             draw,
             "B",
             data["options"]["B"],
-            option_y + 135
+            1200
         )
-
 
         draw_option(
             draw,
             "C",
             data["options"]["C"],
-            option_y + 270
+            1320
         )
-
 
         draw_option(
             draw,
             "D",
             data["options"]["D"],
-            option_y + 405
+            1440
         )
 
 
     # ========================================================
-    # 15–20 SEC
-    # COUNTDOWN
+    # 16-21 COUNTDOWN
     # ========================================================
 
-    elif frame_number < FPS * 20:
+    elif frame_number < FPS * 21:
 
-        draw_label(
+        label(
             draw,
-            "THINK FAST!"
-        )
-
-
-        # Countdown:
-        #
-        # 15.0–16.0 = 5
-        # 16.0–17.0 = 4
-        # 17.0–18.0 = 3
-        # 18.0–19.0 = 2
-        # 19.0–20.0 = 1
-
-        elapsed = (
-            frame_number / FPS
-        ) - 15
-
-
-        countdown_number = (
-            5 -
-            int(elapsed)
-        )
-
-
-        countdown_number = max(
-            1,
-            min(
-                5,
-                countdown_number
-            )
-        )
-
-
-        number = str(
-            countdown_number
-        )
-
-
-        box = draw.textbbox(
-            (0, 0),
-            number,
-            font=font_countdown
-        )
-
-
-        width = (
-            box[2] -
-            box[0]
-        )
-
-
-        height = (
-            box[3] -
-            box[1]
-        )
-
-
-        draw.text(
-            (
-                (WIDTH - width) // 2,
-                730
-            ),
-
-            number,
-
-            font=font_countdown,
-
-            fill=(
-                245,
-                200,
-                80
-            )
-        )
-
-
-        think_text = (
             "LOCK IN YOUR ANSWER"
         )
 
+        elapsed = (
+            frame_number / FPS
+        ) - 16
 
-        box = draw.textbbox(
-            (0, 0),
-            think_text,
-            font=font_small
+        number = max(
+            1,
+            5 - int(elapsed)
         )
 
-
-        width = (
-            box[2] -
-            box[0]
-        )
-
-
-        draw.text(
-            (
-                (WIDTH - width) // 2,
-                1050
-            ),
-
-            think_text,
-
-            font=font_small,
-
-            fill=(
-                180,
-                185,
-                205
-            )
-        )
-
-
-    # ========================================================
-    # 20–24 SEC
-    # ANSWER REVEAL
-    # ========================================================
-
-    elif frame_number < FPS * 24:
-
-        draw_label(
+        centered_text(
             draw,
-            "THE CORRECT ANSWER IS"
+            str(number),
+            font_countdown,
+            760
         )
 
-
-        answer_letter = (
-            data["answer"]
-        )
-
-
-        draw_centered(
+        centered_text(
             draw,
-            [
-                f"OPTION {answer_letter}"
-            ],
-
+            "THINK FAST!",
             font_answer,
-
-            700,
-
-            100
-        )
-
-
-        answer_text = (
-            data["options"]
-            [answer_letter]
-        )
-
-
-        answer_lines = wrap_text(
-            answer_text,
-            font_answer,
-            800
-        )
-
-
-        draw_centered(
-            draw,
-            answer_lines,
-            font_answer,
-            950,
-            90
-        )
-
-
-        correct = "✓ CORRECT ANSWER"
-
-
-        box = draw.textbbox(
-            (0, 0),
-            correct,
-            font=font_small
-        )
-
-
-        width = (
-            box[2] -
-            box[0]
-        )
-
-
-        draw.text(
-            (
-                (WIDTH - width) // 2,
-                1180
-            ),
-
-            correct,
-
-            font=font_small,
-
-            fill=(
-                245,
-                200,
-                80
-            )
+            1080
         )
 
 
     # ========================================================
-    # 24–28 SEC
-    # EXPLANATION
+    # 21-25 ANSWER
     # ========================================================
 
-    elif frame_number < FPS * 28:
+    elif frame_number < FPS * 25:
 
-        draw_label(
+        label(
             draw,
-            "WHY?"
+            "CORRECT ANSWER"
+        )
+
+        centered_text(
+            draw,
+            f"OPTION {data['answer']}",
+            font_answer,
+            650
+        )
+
+        centered_text(
+            draw,
+            data["options"][data["answer"]],
+            font_answer,
+            920,
+            850
+        )
+
+        centered_text(
+            draw,
+            "✓ YOU GOT IT?",
+            font_small,
+            1160
         )
 
 
-        draw_centered(
+    # ========================================================
+    # 25-31 EXPLANATION
+    # ========================================================
+
+    elif frame_number < FPS * 31:
+
+        label(
             draw,
-            explanation_lines,
+            "HERE'S WHY"
+        )
+
+        centered_text(
+            draw,
+            data["explanation"],
             font_explanation,
-            850,
-            75
+            800,
+            850
         )
 
 
     # ========================================================
-    # 28–30 SEC
-    # CTA
+    # 31-35 CTA
     # ========================================================
 
     else:
 
-        draw_label(
+        label(
             draw,
             "DID YOU GET IT RIGHT?"
         )
 
-
-        cta = [
-            "COMMENT",
-            "YOUR ANSWER"
-        ]
-
-
-        draw_centered(
+        centered_text(
             draw,
-            cta,
+            "COMMENT A / B / C / D",
             font_answer,
-            700,
-            100
+            700
         )
 
-
-        follow = (
-            "SUBSCRIBE FOR TOMORROW'S CHALLENGE"
-        )
-
-
-        box = draw.textbbox(
-            (0, 0),
-            follow,
-            font=font_small
-        )
-
-
-        width = (
-            box[2] -
-            box[0]
-        )
-
-
-        draw.text(
-            (
-                (WIDTH - width) // 2,
-                1050
-            ),
-
-            follow,
-
-            font=font_small,
-
-            fill=(
-                245,
-                200,
-                80
-            )
+        centered_text(
+            draw,
+            "SUBSCRIBE FOR TOMORROW'S CHALLENGE",
+            font_small,
+            1050,
+            900
         )
 
 
@@ -1333,28 +1054,20 @@ def create_frame(
 
     progress = int(
         WIDTH *
-        (
-            frame_number + 1
-        ) /
+        (frame_number + 1)
+        /
         TOTAL_FRAMES
     )
-
 
     draw.rectangle(
         (
             0,
-            HEIGHT - 15,
+            HEIGHT - 12,
             progress,
             HEIGHT
         ),
-
-        fill=(
-            245,
-            200,
-            80
-        )
+        fill=(245, 200, 80)
     )
-
 
     return img
 
@@ -1365,29 +1078,20 @@ def create_frame(
 
 print("Cleaning old frames...")
 
-
-for old_frame in FRAMES.glob(
-    "frame_*.png"
-):
+for old in FRAMES.glob("frame_*.png"):
 
     try:
-
-        old_frame.unlink()
-
+        old.unlink()
     except Exception:
-
         pass
 
 
 # ============================================================
-# RENDER FRAMES
+# RENDER
 # ============================================================
 
 print("========================================")
-print("Rendering THINK FAST DAILY video")
-print("Duration:", DURATION, "seconds")
-print("Resolution:", WIDTH, "x", HEIGHT)
-print("FPS:", FPS)
+print("Rendering 35 second video...")
 print("========================================")
 
 
@@ -1399,19 +1103,18 @@ for frame_number in range(
         frame_number
     )
 
-
     frame.save(
         FRAMES /
         f"frame_{frame_number:05d}.png"
     )
-
 
     if frame_number % (
         FPS * 5
     ) == 0:
 
         print(
-            f"Rendered {frame_number / FPS:.0f}s"
+            f"Rendered "
+            f"{frame_number / FPS:.0f}s"
         )
 
 
@@ -1443,7 +1146,7 @@ subprocess.run(
         "medium",
 
         "-crf",
-        "18",
+        "20",
 
         "-pix_fmt",
         "yuv420p",
@@ -1459,13 +1162,12 @@ subprocess.run(
 
         str(SILENT_VIDEO)
     ],
-
     check=True
 )
 
 
 # ============================================================
-# VERIFY VIDEO
+# VERIFY
 # ============================================================
 
 result = subprocess.run(
@@ -1479,14 +1181,10 @@ result = subprocess.run(
         "default=noprint_wrappers=1:nokey=1",
         str(SILENT_VIDEO)
     ],
-
     capture_output=True,
-
     text=True,
-
     check=True
 )
-
 
 video_duration = float(
     result.stdout.strip()
@@ -1494,11 +1192,16 @@ video_duration = float(
 
 
 print("========================================")
-print("THINK FAST DAILY VIDEO GENERATED")
-print("========================================")
-print("Category:", category)
-print("Title:", data["title"])
+print("VIDEO GENERATED")
 print("Duration:", round(video_duration, 2))
-print("Video:", SILENT_VIDEO)
-print("Metadata:", METADATA)
+print("Visual type:", data["visual_type"])
 print("========================================")
+
+
+if abs(
+    video_duration - DURATION
+) > 0.15:
+
+    raise RuntimeError(
+        "Generated video duration is incorrect."
+    )
