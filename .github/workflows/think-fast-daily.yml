@@ -496,12 +496,15 @@ jobs:
 
 
       # ============================================
-      # SAVE HISTORY
+      # SAVE UNIQUE QUESTION HISTORY
       # ============================================
 
-      - name: Save quiz history
-
+      - name: Save THINK FAST DAILY question history
         run: |
+
+          echo "======================================"
+          echo "SAVING QUESTION HISTORY"
+          echo "======================================"
 
           git config user.name \
             "think-fast-daily-bot"
@@ -509,18 +512,22 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
+          if [ ! -f think_fast_history.json ]; then
+            echo "No think_fast_history.json found."
+            echo "Skipping history commit."
+            exit 0
+          fi
 
-          git add quiz_history.json
-
+          git add think_fast_history.json
 
           if git diff --cached --quiet; then
 
-            echo "No history changes."
+            echo "No new question history changes."
 
           else
 
             git commit \
-              -m "Update THINK FAST DAILY quiz history"
+              -m "Update THINK FAST DAILY question history"
 
             git push
 
