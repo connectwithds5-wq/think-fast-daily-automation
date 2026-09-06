@@ -2,6 +2,8 @@ import json
 import os
 import random
 import subprocess
+import re
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -16,6 +18,7 @@ FRAMES = OUTPUT / "think_fast_daily_frames"
 
 SILENT_VIDEO = OUTPUT / "factverse_silent.mp4"
 METADATA = OUTPUT / "metadata.json"
+HISTORY = ROOT / "think_fast_history.json"
 
 OUTPUT.mkdir(parents=True, exist_ok=True)
 FRAMES.mkdir(parents=True, exist_ok=True)
@@ -71,201 +74,147 @@ categories = [
     "common knowledge trick question"
 ]
 
-category = random.choice(categories)
+def load_history():
+    try:
+        if HISTORY.exists():
+            data = json.loads(HISTORY.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                return data
+    except Exception as exc:
+        print("History read warning:", exc)
+    return []
+
+
+def save_history(history):
+    HISTORY.write_text(json.dumps(history[-500:], ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def normalize_question(text):
+    text = str(text).lower().strip()
+    text = re.sub(r"[^a-z0-9\u0900-\u097f]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def is_duplicate_question(question, history):
+    current = normalize_question(question)
+    if not current:
+        return True
+    for item in history:
+        old_question = item.get("question", "") if isinstance(item, dict) else str(item)
+        old = normalize_question(old_question)
+        if not old:
+            continue
+        if current == old:
+            return True
+        if SequenceMatcher(None, current, old).ratio() >= 0.88:
+            return True
+    return False
+
+
+history = load_history()
+
 
 
 # ============================================================
 # AI QUIZ GENERATION
 # ============================================================
 
-prompt = f"""
-You create viral but accurate YouTube Shorts for
-THINK FAST DAILY.
+MAX_GENERATION_ATTEMPTS = 5
+data = None
+
+for generation_attempt in range(1, MAX_GENERATION_ATTEMPTS + 1):
+    category = random.choice(categories)
+    history = load_history()
+    recent_questions = [x.get("question", "") for x in history[-80:] if isinstance(x, dict) and x.get("question")]
+
+    prompt = f"""
+You create viral but accurate YouTube Shorts for THINK FAST DAILY.
 
 Create ONE highly engaging brain quiz / guessing challenge.
 
-Category:
-{category}
+Category: {category}
+
+PREVIOUS QUESTIONS — DO NOT REPEAT:
+{json.dumps(recent_questions, ensure_ascii=False)}
+
+ANTI-REPETITION RULES:
+- The new question MUST be genuinely different.
+- Never repeat a previous question.
+- Never merely reword a previous question.
+- Do not reuse the same core fact with different wording.
+- Do not reuse essentially the same puzzle with a different option.
+- Prefer a fresh topic, fact, clue, or reasoning pattern.
+- The answer must be exactly one of A/B/C/D.
 
 The video is 35 seconds.
 
 TIMELINE:
-
-0-3 seconds:
-POWERFUL HOOK.
-
-3-16 seconds:
-QUESTION + FOUR OPTIONS + VISUAL CLUE.
-
-16-21 seconds:
-5 SECOND THINKING COUNTDOWN.
-
-21-25 seconds:
-ANSWER REVEAL.
-
-25-31 seconds:
-SHORT EXPLANATION.
-
-31-35 seconds:
-NATURAL CTA.
-
-IMPORTANT:
+0-3 seconds: POWERFUL HOOK.
+3-16 seconds: QUESTION + FOUR OPTIONS + VISUAL CLUE.
+16-21 seconds: 5 SECOND THINKING COUNTDOWN.
+21-25 seconds: ANSWER REVEAL.
+25-31 seconds: SHORT EXPLANATION.
+31-35 seconds: NATURAL CTA.
 
 The question must be easy enough to understand quickly.
-
-The answer must be exactly one of A/B/C/D.
-
-Do not reveal the answer in the hook.
-
-Do not reveal the answer in the visual before the reveal.
-
+Do not reveal the answer in the hook or visual.
 Use simple natural English.
+No politics. No medical advice. No dangerous content. No adult content. No graphic content.
 
-No politics.
-No medical advice.
-No dangerous content.
-No adult content.
-No graphic content.
+Create a visual concept matching the question.
 
-Create a visual concept that matches the question.
-
-For example:
-
-animal -> animal silhouette / clues
-country -> globe / map clue
-object -> mystery object silhouette
-number -> animated number sequence
-pattern -> geometric pattern
-space -> planet / stars
-logic -> puzzle blocks
-emoji -> emoji clue
-science -> simple science visual
-
-Return ONLY valid JSON.
-
-Use EXACTLY this structure:
+Return ONLY valid JSON using EXACTLY this structure:
 
 {{
   "hook": "Short curiosity hook, maximum 10 words",
-
   "question": "Quiz question, maximum 20 words",
-
-  "options": {{
-    "A": "Option A",
-    "B": "Option B",
-    "C": "Option C",
-    "D": "Option D"
-  }},
-
+  "options": {{"A": "Option A", "B": "Option B", "C": "Option C", "D": "Option D"}},
   "answer": "A",
-
   "explanation": "Short factual explanation, maximum 30 words",
-
   "visual_type": "animal",
-
-  "visual_prompt": "Describe a simple visual clue for this question without revealing the answer",
-
+  "visual_prompt": "Describe a simple visual clue without revealing the answer",
   "title": "SEO optimized YouTube Shorts title",
-
   "description": "SEO optimized YouTube Shorts description",
-
-  "keywords": [
-    "brain quiz",
-    "iq quiz",
-    "guess the answer",
-    "brain challenge",
-    "puzzle",
-    "trivia",
-    "think fast daily",
-    "shorts"
-  ],
-
-  "hashtags": [
-    "#brainquiz",
-    "#iqquiz",
-    "#guess",
-    "#brainchallenge",
-    "#puzzle",
-    "#trivia",
-    "#shorts",
-    "#thinkfastdaily"
-  ]
+  "keywords": ["brain quiz", "iq quiz", "guess the answer", "brain challenge", "puzzle", "trivia", "think fast daily", "shorts"],
+  "hashtags": ["#brainquiz", "#iqquiz", "#guess", "#brainchallenge", "#puzzle", "#trivia", "#shorts", "#thinkfastdaily"]
 }}
 """
 
+    print(f"Quiz generation attempt {generation_attempt}/{MAX_GENERATION_ATTEMPTS}")
+    print("Category:", category)
 
-print("========================================")
-print("THINK FAST DAILY V2")
-print("Generating quiz...")
-print("Category:", category)
-print("Model:", MODEL)
-print("========================================")
-
-
-response = client.models.generate_content(
-    model=MODEL,
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        response_mime_type="application/json"
+    response = client.models.generate_content(
+        model=MODEL, contents=prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json")
     )
-)
+    text = response.text.strip()
+    if text.startswith("```json"): text = text[7:]
+    if text.startswith("```"): text = text[3:]
+    if text.endswith("```"): text = text[:-3]
+    candidate = json.loads(text.strip())
 
-text = response.text.strip()
+    required = ["hook", "question", "options", "answer", "explanation", "visual_type", "visual_prompt", "title", "description", "keywords", "hashtags"]
+    for field in required:
+        if field not in candidate: raise RuntimeError(f"Missing field: {field}")
+    for option in ["A", "B", "C", "D"]:
+        if option not in candidate["options"]: raise RuntimeError(f"Missing option: {option}")
+    candidate["answer"] = str(candidate["answer"]).upper().strip()
+    if candidate["answer"] not in ["A", "B", "C", "D"]: raise RuntimeError("Answer must be A, B, C or D.")
 
-if text.startswith("```json"):
-    text = text[7:]
+    question = str(candidate["question"]).strip()
+    if is_duplicate_question(question, history):
+        print("DUPLICATE DETECTED:", question)
+        continue
 
-if text.startswith("```"):
-    text = text[3:]
+    data = candidate
+    history = load_history()
+    history.append({"question": question, "answer": data["answer"], "category": category, "title": data["title"]})
+    save_history(history)
+    print("UNIQUE QUESTION ACCEPTED:", question)
+    break
 
-if text.endswith("```"):
-    text = text[:-3]
-
-data = json.loads(text.strip())
-
-
-# ============================================================
-# VALIDATION
-# ============================================================
-
-required = [
-    "hook",
-    "question",
-    "options",
-    "answer",
-    "explanation",
-    "visual_type",
-    "visual_prompt",
-    "title",
-    "description",
-    "keywords",
-    "hashtags"
-]
-
-for field in required:
-    if field not in data:
-        raise RuntimeError(
-            f"Missing field: {field}"
-        )
-
-
-for option in ["A", "B", "C", "D"]:
-    if option not in data["options"]:
-        raise RuntimeError(
-            f"Missing option: {option}"
-        )
-
-
-data["answer"] = str(
-    data["answer"]
-).upper().strip()
-
-
-if data["answer"] not in ["A", "B", "C", "D"]:
-    raise RuntimeError(
-        "Answer must be A, B, C or D."
-    )
-
+if data is None:
+    raise RuntimeError(f"Could not generate a unique question after {MAX_GENERATION_ATTEMPTS} attempts.")
 
 data["channel"] = "THINK FAST DAILY"
 data["category"] = category
