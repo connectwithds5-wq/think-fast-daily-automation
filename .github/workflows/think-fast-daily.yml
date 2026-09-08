@@ -134,7 +134,6 @@ jobs:
           print("Gemini SDK retry policy forced: attempts=1, timeout=12s")
           PY
 
-          # One attempt per model. The workflow, not the SDK, controls fallback.
           sed -i 's/^MAX_GENERATION_ATTEMPTS = 5$/MAX_GENERATION_ATTEMPTS = 1/' "$GENERATOR"
           python -m py_compile "$GENERATOR" || exit 1
 
@@ -162,7 +161,15 @@ jobs:
               exit 0
             fi
 
-            if grep -Eiq '503|UNAVAILABLE|high demand|429|RESOURCE_EXHAUSTED|rate limit|quota|temporarily unavailable|model.*not found|not found.*model|timed out|timeout' "$LOG_FILE"; then
+            # timeout(1) returns 124; 137 means the process was forcibly killed.
+            # Either way, never let one slow/unavailable model block fallback.
+            if [ "$STATUS" -eq 124 ] || [ "$STATUS" -eq 137 ]; then
+              echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
+              echo "Moving immediately to the next Gemini model..."
+              continue
+            fi
+
+            if grep -Eiq '503|UNAVAILABLE|high demand|429|RESOURCE_EXHAUSTED|rate limit|quota|temporarily unavailable|model.*not found|not found.*model|timed out|timeout|deadline exceeded' "$LOG_FILE"; then
               echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
