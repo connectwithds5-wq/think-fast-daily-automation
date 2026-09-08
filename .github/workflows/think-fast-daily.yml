@@ -22,7 +22,7 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_MODEL: gemini-3.8-flash
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-      YOUTUBE_CHANNEL_ID: ${{ vars.YOUTUBE_CHANNEL_ID }}
+      YOUTUBE_CHANNEL_ID: ${{ vars.YOUTUBE_CHANNEL_ID || secrets.YOUTUBE_CHANNEL_ID }}
       YOUTUBE_OAUTH_JSON: ${{ secrets.YOUTUBE_OAUTH_JSON }}
       YOUTUBE_PRIVACY_STATUS: public
       TTS_VOICE: en-US-GuyNeural
@@ -162,22 +162,18 @@ jobs:
               break
             fi
 
-            # A slow/hung model must never block the fallback chain.
             if [ "$STATUS" -eq 124 ] || [ "$STATUS" -eq 137 ]; then
               echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
             fi
 
-            # Treat all common Google transient/server failures as retryable.
-            # In particular, 504 DEADLINE_EXCEEDED must NEVER be mistaken for auth.
             if grep -Eiq '(^|[^0-9])5(00|02|03|04)([^0-9]|$)|408|429|UNAVAILABLE|DEADLINE_EXCEEDED|deadline[_ ]+exceeded|high demand|RESOURCE_EXHAUSTED|rate.?limit|quota|temporarily unavailable|timed.?out|timeout|model.*not found|not found.*model' "$LOG_FILE"; then
               echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
             fi
 
-            # Only genuine authentication/permission failures are fatal.
             if grep -Eiq '(^|[^0-9])(401|403)([^0-9]|$)|UNAUTHENTICATED|PERMISSION_DENIED|invalid[_ ]?api[_ ]?key|api[_ ]?key.*invalid|authentication failed' "$LOG_FILE"; then
               echo "FATAL GEMINI AUTHENTICATION/PERMISSION ERROR. Fallback will not help."
               exit "$STATUS"
