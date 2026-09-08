@@ -144,6 +144,8 @@ jobs:
             "gemini-3.1-flash-lite"
           )
 
+          AI_SUCCESS=0
+
           for MODEL in "${MODELS[@]}"; do
             echo "======================================"
             echo "TRYING GEMINI MODEL: $MODEL"
@@ -156,7 +158,8 @@ jobs:
 
             if [ "$STATUS" -eq 0 ]; then
               echo "SUCCESS: Quiz generated with $MODEL"
-              exit 0
+              AI_SUCCESS=1
+              break
             fi
 
             # A slow/hung model must never block the fallback chain.
@@ -184,8 +187,17 @@ jobs:
             exit "$STATUS"
           done
 
-          echo "ERROR: All configured Gemini models were unavailable, rate-limited, or timed out."
-          exit 1
+          if [ "$AI_SUCCESS" -eq 0 ]; then
+            echo "======================================"
+            echo "ALL GEMINI MODELS FAILED"
+            echo "STARTING OFFLINE QUIZ FALLBACK"
+            echo "======================================"
+            python src/local_quiz_fallback.py || {
+              echo "ERROR: Offline quiz fallback also failed."
+              exit 1
+            }
+            echo "SUCCESS: Quiz generated locally without Gemini."
+          fi
 
       - name: Check generated frames
         run: |
