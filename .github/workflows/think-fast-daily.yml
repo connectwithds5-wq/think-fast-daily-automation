@@ -110,6 +110,11 @@ jobs:
           GENERATOR="src/think_fast_daily_generate.py"
           LOG_FILE="/tmp/think-fast-quiz-generation.log"
 
+          # The google-genai SDK retries 429/5xx responses by default.
+          # Disable those internal retries so an unavailable model is skipped
+          # quickly and the workflow can move to the next Gemini model.
+          sed -i 's/client = genai.Client(api_key=api_key)/client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=15000, retry_options=types.HttpRetryOptions(attempts=1)))/' "$GENERATOR"
+
           # One attempt per model: if the current model is unavailable/rate-limited,
           # move immediately to the next model instead of retrying the same model.
           sed -i 's/^MAX_GENERATION_ATTEMPTS = 5$/MAX_GENERATION_ATTEMPTS = 1/' "$GENERATOR"
