@@ -76,14 +76,18 @@ jobs:
           cat think_fast_strategy.json
 
       - name: Apply AI-selected posting times
+        env:
+          WORKFLOW_PAT: ${{ secrets.WORKFLOW_PAT }}
         run: |
           python src/update_posting_schedule.py
           if ! git diff --quiet -- .github/workflows/think-fast-daily.yml; then
+            test -n "$WORKFLOW_PAT" || { echo "ERROR: WORKFLOW_PAT secret is missing. Add a GitHub PAT with workflow permission."; exit 1; }
             git config user.name "think-fast-daily-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add .github/workflows/think-fast-daily.yml
             git commit -m "Update THINK FAST posting schedule from analytics"
-            git push
+            git remote set-url origin "https://x-access-token:${WORKFLOW_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           else
             echo "Posting schedule already matches current AI strategy."
           fi
