@@ -164,15 +164,13 @@ jobs:
           PAGES_VIDEO_URL: ${{ steps.deployment.outputs.page_url }}
         run: python src/upload_instagram.py
 
-      - name: Save THINK FAST DAILY question history
+      - name: Save THINK FAST DAILY strategy and question history
         run: |
           git config user.name "think-fast-daily-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -f think_fast_history.json ]; then
-            git add think_fast_history.json
-            git diff --cached --quiet || git commit -m "Update THINK FAST DAILY question history"
-            git push
-          fi
+          git add think_fast_history.json think_fast_strategy.json
+          git diff --cached --quiet || git commit -m "Update THINK FAST DAILY analytics strategy"
+          git push
 
       - name: Save video artifact
         uses: actions/upload-artifact@v4
