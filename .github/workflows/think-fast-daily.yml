@@ -110,14 +110,33 @@ jobs:
           GENERATOR="src/think_fast_daily_generate.py"
           LOG_FILE="/tmp/think-fast-quiz-generation.log"
 
-          # The google-genai SDK retries 429/5xx responses by default.
-          # Disable those internal retries so an unavailable model is skipped
-          # quickly and the workflow can move to the next Gemini model.
-          sed -i 's/client = genai.Client(api_key=api_key)/client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=15000, retry_options=types.HttpRetryOptions(attempts=1)))/' "$GENERATOR"
+          # IMPORTANT: the generator uses a multiline Client() call. Patch it
+          # with Python instead of sed so the SDK retry policy is actually applied.
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("src/think_fast_daily_generate.py")
+          s = p.read_text(encoding="utf-8")
+          old = """client = genai.Client(api_key=api_key)"""
+          if old in s:
+              new = """client = genai.Client(\n    api_key=api_key,\n    http_options=types.HttpOptions(\n        timeout=12000,\n        retry_options=types.HttpRetryOptions(attempts=1)\n    )\n)"""
+              s = s.replace(old, new, 1)
+          else:
+              marker = "client = genai.Client(\n"
+              start = s.find(marker)
+              if start < 0:
+                  raise SystemExit("ERROR: Gemini client initialization not found.")
+              end = s.find("\n)\n\nMODEL =", start)
+              if end < 0:
+                  raise SystemExit("ERROR: Could not locate end of Gemini client initialization.")
+              new = """client = genai.Client(\n    api_key=api_key,\n    http_options=types.HttpOptions(\n        timeout=12000,\n        retry_options=types.HttpRetryOptions(attempts=1)\n    )\n)\n"""
+              s = s[:start] + new + s[end + 3:]
+          p.write_text(s, encoding="utf-8")
+          print("Gemini SDK retry policy forced: attempts=1, timeout=12s")
+          PY
 
-          # One attempt per model: if the current model is unavailable/rate-limited,
-          # move immediately to the next model instead of retrying the same model.
+          # One attempt per model. The workflow, not the SDK, controls fallback.
           sed -i 's/^MAX_GENERATION_ATTEMPTS = 5$/MAX_GENERATION_ATTEMPTS = 1/' "$GENERATOR"
+          python -m py_compile "$GENERATOR" || exit 1
 
           MODELS=(
             "gemini-3.8-flash"
@@ -134,7 +153,7 @@ jobs:
             echo "======================================"
             rm -f "$LOG_FILE"
 
-            GEMINI_MODEL="$MODEL" timeout 40s python "$GENERATOR" >"$LOG_FILE" 2>&1
+            GEMINI_MODEL="$MODEL" timeout 20s python "$GENERATOR" >"$LOG_FILE" 2>&1
             STATUS=$?
             cat "$LOG_FILE"
 
@@ -143,8 +162,8 @@ jobs:
               exit 0
             fi
 
-            if grep -Eiq '503|UNAVAILABLE|high demand|429|RESOURCE_EXHAUSTED|rate limit|quota|temporarily unavailable|model.*not found|not found.*model' "$LOG_FILE"; then
-              echo "MODEL UNAVAILABLE/RATE-LIMITED: $MODEL"
+            if grep -Eiq '503|UNAVAILABLE|high demand|429|RESOURCE_EXHAUSTED|rate limit|quota|temporarily unavailable|model.*not found|not found.*model|timed out|timeout' "$LOG_FILE"; then
+              echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
             fi
@@ -158,7 +177,7 @@ jobs:
             exit "$STATUS"
           done
 
-          echo "ERROR: All configured Gemini models were unavailable or rate-limited."
+          echo "ERROR: All configured Gemini models were unavailable, rate-limited, or timed out."
           exit 1
 
       - name: Check generated frames
