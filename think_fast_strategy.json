@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-09-08T17:08:20.096185+00:00",
+  "confidence": "low",
+  "overall_summary": "Performance data array is empty, but question history shows a healthy mix of physics puzzles, history trivia, logic problems, and space science challenges. Titles consistently utilize emojis and curiosity gaps like 'Can You Solve...' or 'What Color Is...'.",
+  "winning_patterns": [
+    {
+      "pattern": "Curiosity gap title framing",
+      "evidence": "Titles consistently use challenges like 'Can You Solve...' or 'The Flying Bird Physics Puzzle That Tricks Everyone!'",
+      "action": "Continue framing titles around counter-intuitive results or direct challenges to the viewer."
+    },
+    {
+      "pattern": "Multidisciplinary variety",
+      "evidence": "History, physics, space, and object guessing categories are evenly rotated in the history.",
+      "action": "Maintain rotation across different science and general knowledge domains to appeal to broad audiences."
+    }
+  ],
+  "improvements": [
+    {
+      "pattern": "Missing performance metrics",
+      "evidence": "YouTube performance data array is empty, making it impossible to analyze views, retention, or likes.",
+      "action": "Integrate analytics tracking to evaluate specific category conversion rates."
+    }
+  ],
+  "best_posting_windows": [
+    {
+      "window": "Afternoon Peak",
+      "hour_utc": 15,
+      "minute_utc": 0,
+      "reason": "Default high-engagement afternoon slot for general audiences due to lack of historical timestamp data.",
+      "confidence": "low"
+    },
+    {
+      "window": "Evening Peak",
+      "hour_utc": 20,
+      "minute_utc": 0,
+      "reason": "Default evening leisure slot for general audiences due to lack of historical timestamp data.",
+      "confidence": "low"
+    }
+  ],
+  "next_best_quiz_directions": [
+    {
+      "priority": 1,
+      "topic": "Optical illusion geometry",
+      "hook": "Which line is actually longer?",
+      "visual_type": "Side-by-side animated lines with rotating perspective",
+      "reason": "Builds on successful visual brain puzzles with instant A/B choices.",
+      "confidence": "medium"
+    },
+    {
+      "priority": 2,
+      "topic": "Daily object macro photography",
+      "hook": "What is this extreme close-up everyday object?",
+      "visual_type": "Zooming out from a macro texture to reveal the item",
+      "reason": "Expands on the 'guess the object' category format.",
+      "confidence": "medium"
+    }
+  ],
+  "avoid_or_limit": [
+    {
+      "item": "Repeated mechanical or thermal physics puzzles",
+      "reason": "Two physics puzzle types (washer and bird in box) were recently used; need fresh topics to prevent fatigue."
+    }
+  ],
+  "model_used": "gemini-3.5-flash-lite",
+  "data_source": "question_history_fallback",
+  "data_points": 0
+}
