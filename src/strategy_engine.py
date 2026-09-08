@@ -31,33 +31,37 @@ def youtube_data():
     if not key or not channel_id:
         return []
     base = "https://www.googleapis.com/youtube/v3"
-    r = requests.get(base + "/channels", params={"part": "contentDetails", "id": channel_id, "key": key}, timeout=30)
-    r.raise_for_status()
-    items = r.json().get("items", [])
-    if not items:
+    try:
+        r = requests.get(base + "/channels", params={"part": "contentDetails", "id": channel_id, "key": key}, timeout=30)
+        r.raise_for_status()
+        items = r.json().get("items", [])
+        if not items:
+            return []
+        uploads = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        r = requests.get(base + "/playlistItems", params={"part": "contentDetails", "playlistId": uploads, "maxResults": MAX_VIDEOS, "key": key}, timeout=30)
+        r.raise_for_status()
+        ids = [x["contentDetails"]["videoId"] for x in r.json().get("items", [])]
+        if not ids:
+            return []
+        r = requests.get(base + "/videos", params={"part": "snippet,statistics,contentDetails", "id": ",".join(ids), "key": key}, timeout=30)
+        r.raise_for_status()
+        out = []
+        for x in r.json().get("items", []):
+            s = x.get("statistics", {})
+            sn = x.get("snippet", {})
+            out.append({
+                "video_id": x.get("id"),
+                "title": sn.get("title", ""),
+                "published_at": sn.get("publishedAt"),
+                "views": int(s.get("viewCount", 0)),
+                "likes": int(s.get("likeCount", 0)),
+                "comments": int(s.get("commentCount", 0)),
+                "description_excerpt": sn.get("description", "")[:300],
+            })
+        return sorted(out, key=lambda x: x.get("published_at") or "", reverse=True)
+    except Exception as exc:
+        print("YouTube analytics warning; using question-history fallback:", exc)
         return []
-    uploads = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
-    r = requests.get(base + "/playlistItems", params={"part": "contentDetails", "playlistId": uploads, "maxResults": MAX_VIDEOS, "key": key}, timeout=30)
-    r.raise_for_status()
-    ids = [x["contentDetails"]["videoId"] for x in r.json().get("items", [])]
-    if not ids:
-        return []
-    r = requests.get(base + "/videos", params={"part": "snippet,statistics,contentDetails", "id": ",".join(ids), "key": key}, timeout=30)
-    r.raise_for_status()
-    out = []
-    for x in r.json().get("items", []):
-        s = x.get("statistics", {})
-        sn = x.get("snippet", {})
-        out.append({
-            "video_id": x.get("id"),
-            "title": sn.get("title", ""),
-            "published_at": sn.get("publishedAt"),
-            "views": int(s.get("viewCount", 0)),
-            "likes": int(s.get("likeCount", 0)),
-            "comments": int(s.get("commentCount", 0)),
-            "description_excerpt": sn.get("description", "")[:300],
-        })
-    return sorted(out, key=lambda x: x.get("published_at") or "", reverse=True)
 
 
 def build_prompt(videos, history):
@@ -104,6 +108,15 @@ def generate_strategy(client, model, prompt):
     return json.loads(text)
 
 
+def is_transient(message):
+    text = str(message).lower()
+    return any(token in text for token in (
+        "408", "429", "500", "502", "503", "504", "unavailable",
+        "high demand", "resource_exhausted", "rate limit", "quota",
+        "timed out", "timeout", "deadline exceeded", "temporarily unavailable"
+    ))
+
+
 def main():
     history = load(HISTORY, [])
     videos = youtube_data()
@@ -112,7 +125,14 @@ def main():
     if not key:
         raise RuntimeError("GEMINI_API_KEY is missing")
 
-    client = genai.Client(api_key=key)
+    client = genai.Client(
+        api_key=key,
+        http_options=types.HttpOptions(
+            timeout=12000,
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ),
+    )
+
     requested = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
     models = []
     for model in [
@@ -120,7 +140,9 @@ def main():
         "gemini-3.8-flash",
         "gemini-3.7-flash",
         "gemini-3.6-flash",
+        "gemini-3.5-flash",
         "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
     ]:
         if model and model not in models:
             models.append(model)
@@ -128,24 +150,24 @@ def main():
     prompt = build_prompt(videos, history)
     last_error = None
     strategy = None
+
     for model in models:
-        for attempt in range(2):
-            try:
-                print(f"Trying Gemini strategy model: {model} (attempt {attempt + 1}/2)")
-                strategy = generate_strategy(client, model, prompt)
-                strategy["model_used"] = model
-                break
-            except Exception as exc:
-                last_error = exc
-                message = str(exc)
-                transient = any(token in message for token in (
-                    "503", "UNAVAILABLE", "high demand", "429", "RESOURCE_EXHAUSTED", "rate limit"
-                ))
-                print(f"Gemini model failed: {model}: {message}")
-                if not transient:
-                    raise
-        if strategy is not None:
+        try:
+            print(f"Trying Gemini strategy model: {model}")
+            strategy = generate_strategy(client, model, prompt)
+            if not isinstance(strategy, dict):
+                raise RuntimeError("Gemini strategy response was not a JSON object")
+            strategy["model_used"] = model
+            print(f"Strategy SUCCESS with {model}")
             break
+        except Exception as exc:
+            last_error = exc
+            print(f"Gemini strategy model failed: {model}: {exc}")
+            if not is_transient(exc):
+                message = str(exc).lower()
+                if any(token in message for token in ("401", "403", "api key", "authentication", "permission denied")):
+                    raise
+                print("Non-transient model response error; trying next model for resilience.")
 
     if strategy is None:
         raise RuntimeError(f"All Gemini strategy models failed. Last error: {last_error}")
