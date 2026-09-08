@@ -94,6 +94,16 @@ QUESTION HISTORY:
 """
 
 
+def generate_strategy(client, model, prompt):
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(response_mime_type="application/json"),
+    )
+    text = (response.text or "").strip().removeprefix("```json").removesuffix("```").strip()
+    return json.loads(text)
+
+
 def main():
     history = load(HISTORY, [])
     videos = youtube_data()
@@ -101,19 +111,42 @@ def main():
     key = os.getenv("GEMINI_API_KEY", "").strip()
     if not key:
         raise RuntimeError("GEMINI_API_KEY is missing")
+
     client = genai.Client(api_key=key)
-    response = client.models.generate_content(
-        model=os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
-        contents=build_prompt(videos, history),
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
-    )
-    text = (response.text or "").strip().removeprefix("```json").removesuffix("```").strip()
-    strategy = json.loads(text)
+    requested = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    models = []
+    for model in [requested, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.1-flash-lite"]:
+        if model and model not in models:
+            models.append(model)
+
+    prompt = build_prompt(videos, history)
+    last_error = None
+    strategy = None
+    for model in models:
+        for attempt in range(2):
+            try:
+                print(f"Trying Gemini strategy model: {model} (attempt {attempt + 1}/2)")
+                strategy = generate_strategy(client, model, prompt)
+                strategy["model_used"] = model
+                break
+            except Exception as exc:
+                last_error = exc
+                message = str(exc)
+                transient = any(token in message for token in ("503", "UNAVAILABLE", "high demand", "429", "RESOURCE_EXHAUSTED"))
+                print(f"Gemini model failed: {model}: {message}")
+                if not transient:
+                    raise
+        if strategy is not None:
+            break
+
+    if strategy is None:
+        raise RuntimeError(f"All Gemini strategy models failed. Last error: {last_error}")
+
     strategy["generated_at"] = datetime.now(timezone.utc).isoformat()
     strategy["data_source"] = source
     strategy["data_points"] = len(videos)
     save(STRATEGY, strategy)
-    print("THINK FAST strategy updated", source, len(videos))
+    print("THINK FAST strategy updated", source, len(videos), "using", strategy["model_used"])
 
 
 if __name__ == "__main__":
