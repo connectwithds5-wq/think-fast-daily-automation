@@ -75,6 +75,19 @@ jobs:
           python src/strategy_engine.py
           cat think_fast_strategy.json
 
+      - name: Apply AI-selected posting times
+        run: |
+          python src/update_posting_schedule.py
+          if ! git diff --quiet -- .github/workflows/think-fast-daily.yml; then
+            git config user.name "think-fast-daily-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/workflows/think-fast-daily.yml
+            git commit -m "Update THINK FAST posting schedule from analytics"
+            git push
+          else
+            echo "Posting schedule already matches current AI strategy."
+          fi
+
       - name: Inject strategy into quiz generator
         run: |
           python src/strategy_injector.py
@@ -94,7 +107,7 @@ jobs:
           test -d "$FRAME_DIR" || { echo "ERROR: Frame directory not found."; find output -maxdepth 3 -type f -print || true; exit 1; }
           FRAME_COUNT=$(find "$FRAME_DIR" -maxdepth 1 -type f -name "frame_*.png" | wc -l)
           echo "Frame count: $FRAME_COUNT"
-          test "$FRAME_COUNT" -ge 10 || { echo "ERROR: Too few frames."; exit 1; }
+          test "$FRAME_COUNT" -ge 10 || { echo "ERROR: Too few frames."; find output -maxdepth 3 -type f -print || true; exit 1; }
 
       - name: Render silent video
         run: |
@@ -179,7 +192,7 @@ jobs:
         if: success()
         run: |
           echo "THINK FAST DAILY SUCCESS"
-          echo "Analytics strategy -> AI quiz -> YouTube + Instagram: COMPLETE"
+          echo "Analytics -> AI strategy -> dynamic posting time -> quiz -> YouTube + Instagram: COMPLETE"
 
       - name: Failure report
         if: failure()
