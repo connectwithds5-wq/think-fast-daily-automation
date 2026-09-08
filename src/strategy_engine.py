@@ -113,9 +113,15 @@ def main():
         raise RuntimeError("GEMINI_API_KEY is missing")
 
     client = genai.Client(api_key=key)
-    requested = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    requested = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
     models = []
-    for model in [requested, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.1-flash-lite"]:
+    for model in [
+        requested,
+        "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite",
+    ]:
         if model and model not in models:
             models.append(model)
 
@@ -132,7 +138,9 @@ def main():
             except Exception as exc:
                 last_error = exc
                 message = str(exc)
-                transient = any(token in message for token in ("503", "UNAVAILABLE", "high demand", "429", "RESOURCE_EXHAUSTED"))
+                transient = any(token in message for token in (
+                    "503", "UNAVAILABLE", "high demand", "429", "RESOURCE_EXHAUSTED", "rate limit"
+                ))
                 print(f"Gemini model failed: {model}: {message}")
                 if not transient:
                     raise
