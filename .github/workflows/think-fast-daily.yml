@@ -110,8 +110,6 @@ jobs:
           GENERATOR="src/think_fast_daily_generate.py"
           LOG_FILE="/tmp/think-fast-quiz-generation.log"
 
-          # IMPORTANT: the generator uses a multiline Client() call. Patch it
-          # with Python instead of sed so the SDK retry policy is actually applied.
           python - <<'PY'
           from pathlib import Path
           p = Path("src/think_fast_daily_generate.py")
@@ -161,22 +159,24 @@ jobs:
               exit 0
             fi
 
-            # timeout(1) returns 124; 137 means the process was forcibly killed.
-            # Either way, never let one slow/unavailable model block fallback.
+            # A slow/hung model must never block the fallback chain.
             if [ "$STATUS" -eq 124 ] || [ "$STATUS" -eq 137 ]; then
               echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
             fi
 
-            if grep -Eiq '503|UNAVAILABLE|high demand|429|RESOURCE_EXHAUSTED|rate limit|quota|temporarily unavailable|model.*not found|not found.*model|timed out|timeout|deadline exceeded' "$LOG_FILE"; then
+            # Treat all common Google transient/server failures as retryable.
+            # In particular, 504 DEADLINE_EXCEEDED must NEVER be mistaken for auth.
+            if grep -Eiq '(^|[^0-9])5(00|02|03|04)([^0-9]|$)|408|429|UNAVAILABLE|DEADLINE_EXCEEDED|deadline[_ ]+exceeded|high demand|RESOURCE_EXHAUSTED|rate.?limit|quota|temporarily unavailable|timed.?out|timeout|model.*not found|not found.*model' "$LOG_FILE"; then
               echo "MODEL UNAVAILABLE/RATE-LIMITED/TIMED OUT: $MODEL"
               echo "Moving immediately to the next Gemini model..."
               continue
             fi
 
-            if grep -Eiq '401|403|API key|permission denied|invalid.*key|authentication' "$LOG_FILE"; then
-              echo "FATAL GEMINI AUTHENTICATION ERROR. Fallback will not help."
+            # Only genuine authentication/permission failures are fatal.
+            if grep -Eiq '(^|[^0-9])(401|403)([^0-9]|$)|UNAUTHENTICATED|PERMISSION_DENIED|invalid[_ ]?api[_ ]?key|api[_ ]?key.*invalid|authentication failed' "$LOG_FILE"; then
+              echo "FATAL GEMINI AUTHENTICATION/PERMISSION ERROR. Fallback will not help."
               exit "$STATUS"
             fi
 
