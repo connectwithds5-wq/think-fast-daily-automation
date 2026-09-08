@@ -1,4 +1,4 @@
-"""Build a data-backed content strategy for THINK FAST DAILY."""
+"""Build a data-backed content and posting-time strategy for THINK FAST DAILY."""
 import json
 import os
 from datetime import datetime, timezone
@@ -31,28 +31,31 @@ def youtube_data():
     if not key or not channel_id:
         return []
     base = "https://www.googleapis.com/youtube/v3"
-    r = requests.get(base + "/channels", params={"part":"contentDetails", "id":channel_id, "key":key}, timeout=30)
+    r = requests.get(base + "/channels", params={"part": "contentDetails", "id": channel_id, "key": key}, timeout=30)
     r.raise_for_status()
     items = r.json().get("items", [])
     if not items:
         return []
     uploads = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
-    r = requests.get(base + "/playlistItems", params={"part":"contentDetails", "playlistId":uploads, "maxResults":MAX_VIDEOS, "key":key}, timeout=30)
+    r = requests.get(base + "/playlistItems", params={"part": "contentDetails", "playlistId": uploads, "maxResults": MAX_VIDEOS, "key": key}, timeout=30)
     r.raise_for_status()
     ids = [x["contentDetails"]["videoId"] for x in r.json().get("items", [])]
     if not ids:
         return []
-    r = requests.get(base + "/videos", params={"part":"snippet,statistics,contentDetails", "id":",".join(ids), "key":key}, timeout=30)
+    r = requests.get(base + "/videos", params={"part": "snippet,statistics,contentDetails", "id": ",".join(ids), "key": key}, timeout=30)
     r.raise_for_status()
     out = []
     for x in r.json().get("items", []):
         s = x.get("statistics", {})
         sn = x.get("snippet", {})
         out.append({
-            "video_id": x.get("id"), "title": sn.get("title", ""),
-            "published_at": sn.get("publishedAt"), "views": int(s.get("viewCount", 0)),
-            "likes": int(s.get("likeCount", 0)), "comments": int(s.get("commentCount", 0)),
-            "category": sn.get("description", "")[:300],
+            "video_id": x.get("id"),
+            "title": sn.get("title", ""),
+            "published_at": sn.get("publishedAt"),
+            "views": int(s.get("viewCount", 0)),
+            "likes": int(s.get("likeCount", 0)),
+            "comments": int(s.get("commentCount", 0)),
+            "description_excerpt": sn.get("description", "")[:300],
         })
     return sorted(out, key=lambda x: x.get("published_at") or "", reverse=True)
 
@@ -60,19 +63,25 @@ def youtube_data():
 def build_prompt(videos, history):
     return f"""
 You are the performance strategist for THINK FAST DAILY, a YouTube Shorts quiz/brain-challenge channel.
-Analyze ONLY the supplied performance data. Do not invent watch time or retention.
-Use views, likes, comments, titles, publish times and question/category history when available.
-Identify repeatable winning quiz formats, topics, hooks and posting windows. Penalize repeated questions.
-The next videos must be fresh variations, not copies.
-Prefer simple, instantly understandable challenges with a strong curiosity gap and a clear A/B/C/D answer.
-Return ONLY JSON:
+Analyze ONLY the supplied performance data. Do not invent watch time, retention, swipe rate, or subscriber data.
+Use views, likes, comments, titles, publish timestamps and question/category history when available.
+Identify repeatable winning quiz formats, topics, hooks, visual styles, difficulty and posting times.
+Penalize repeated questions and weak engagement. The next videos must be fresh variations, not copies.
+Prefer simple, instantly understandable A/B/C/D challenges with a strong curiosity gap and a visual clue.
+
+IMPORTANT POSTING-TIME RULE:
+Choose the best TWO posting times based on the supplied performance timestamps. Return exact UTC hour/minute integers.
+These values are used to automatically rewrite the GitHub Actions cron schedule for the next runs.
+If evidence is weak, choose conservative times from the strongest observed posting cluster and set confidence low.
+
+Return ONLY JSON in exactly this shape:
 {{
   "generated_at":"",
   "confidence":"low|medium|high",
   "overall_summary":"",
   "winning_patterns":[{{"pattern":"","evidence":"","action":""}}],
   "improvements":[{{"pattern":"","evidence":"","action":""}}],
-  "best_posting_windows":[{{"window":"","reason":"","confidence":"low|medium|high"}}],
+  "best_posting_windows":[{{"window":"","hour_utc":0,"minute_utc":0,"reason":"","confidence":"low|medium|high"}}],
   "next_best_quiz_directions":[{{"priority":1,"topic":"","hook":"","visual_type":"","reason":"","confidence":"low|medium|high"}}],
   "avoid_or_limit":[{{"item":"","reason":""}}]
 }}
@@ -89,8 +98,6 @@ def main():
     history = load(HISTORY, [])
     videos = youtube_data()
     source = "youtube_public_analytics" if videos else "question_history_fallback"
-    if not videos:
-        videos = []
     key = os.getenv("GEMINI_API_KEY", "").strip()
     if not key:
         raise RuntimeError("GEMINI_API_KEY is missing")
@@ -107,6 +114,7 @@ def main():
     strategy["data_points"] = len(videos)
     save(STRATEGY, strategy)
     print("THINK FAST strategy updated", source, len(videos))
+
 
 if __name__ == "__main__":
     main()
