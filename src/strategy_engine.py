@@ -1,8 +1,9 @@
-"""Build THINK FAST DAILY strategy from public YouTube data and owner Analytics."""
+"""Build THINK FAST DAILY strategy from YouTube performance and a persistent learning loop."""
 import json
 import os
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from statistics import median
 
 import requests
 from google import genai
@@ -14,6 +15,8 @@ from googleapiclient.discovery import build
 ROOT = Path(__file__).resolve().parents[1]
 HISTORY = ROOT / "think_fast_history.json"
 STRATEGY = ROOT / "think_fast_strategy.json"
+LEARNING = ROOT / "think_fast_learning.json"
+ANALYTICS_SNAPSHOT = ROOT / "think_fast_analytics_snapshot.json"
 MAX_VIDEOS = 50
 ANALYTICS_VIDEO_LIMIT = 20
 YOUTUBE_SCOPES = [
@@ -24,7 +27,8 @@ YOUTUBE_SCOPES = [
 
 def load(path, default):
     try:
-        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+        data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+        return data
     except Exception:
         return default
 
@@ -151,7 +155,105 @@ def summarize_retention(points):
     return sampled[:15]
 
 
-def build_prompt(videos, analytics, retention, history):
+def parse_dt(value):
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def evaluate_previous_strategy(videos, analytics, previous_strategy, learning):
+    """Score videos published after the previous strategy, once they have enough age."""
+    if not isinstance(previous_strategy, dict):
+        return learning
+    generated_at = parse_dt(previous_strategy.get("generated_at"))
+    if not generated_at:
+        return learning
+    evaluated = set(learning.get("evaluated_video_ids", [])) if isinstance(learning, dict) else set()
+    records = list(learning.get("records", [])) if isinstance(learning, dict) else []
+    now = datetime.now(timezone.utc)
+    candidates = []
+    for video in videos:
+        vid = video.get("video_id")
+        published = parse_dt(video.get("published_at"))
+        if not vid or not published or vid in evaluated or published <= generated_at:
+            continue
+        if (now - published).total_seconds() < 6 * 3600:
+            continue
+        if vid not in analytics:
+            continue
+        candidates.append(video)
+
+    if not candidates:
+        return learning if isinstance(learning, dict) else {"records": [], "evaluated_video_ids": []}
+
+    baseline_videos = []
+    for video in videos:
+        published = parse_dt(video.get("published_at"))
+        if published and published < generated_at and video.get("video_id") in analytics:
+            baseline_videos.append(video)
+    baseline_videos = baseline_videos[:20]
+
+    def metric(video, key):
+        return safe_float(analytics.get(video.get("video_id"), {}).get(key, 0))
+
+    def engagement(video):
+        views = max(1.0, metric(video, "views"))
+        return (metric(video, "likes") + metric(video, "comments") + metric(video, "shares")) / views
+
+    baseline = {
+        "views": median([metric(v, "views") for v in baseline_videos]) if baseline_videos else 0,
+        "average_view_percentage": median([metric(v, "averageViewPercentage") for v in baseline_videos]) if baseline_videos else 0,
+        "average_view_duration": median([metric(v, "averageViewDuration") for v in baseline_videos]) if baseline_videos else 0,
+        "engagement_rate": median([engagement(v) for v in baseline_videos]) if baseline_videos else 0,
+    }
+
+    direction = (previous_strategy.get("next_best_quiz_directions") or [{}])[0]
+    for video in candidates:
+        views = metric(video, "views")
+        avp = metric(video, "averageViewPercentage")
+        avd = metric(video, "averageViewDuration")
+        er = engagement(video)
+        ratios = []
+        for actual, base in ((avp, baseline["average_view_percentage"]), (avd, baseline["average_view_duration"]), (er, baseline["engagement_rate"])):
+            if base > 0:
+                ratios.append(actual / base)
+        if baseline["views"] > 0:
+            ratios.append(min(views / baseline["views"], 2.0))
+        score = sum(ratios) / len(ratios) if ratios else 1.0
+        outcome = "WIN" if score >= 1.10 else "LOSS" if score <= 0.90 else "NEUTRAL"
+        record = {
+            "evaluated_at": now.isoformat(),
+            "strategy_generated_at": previous_strategy.get("generated_at"),
+            "strategy_model": previous_strategy.get("model_used", ""),
+            "strategy_direction": direction,
+            "video_id": video.get("video_id"),
+            "video_title": video.get("title", ""),
+            "outcome": outcome,
+            "score_vs_baseline": round(score, 3),
+            "metrics": {
+                "views": views,
+                "average_view_percentage": avp,
+                "average_view_duration": avd,
+                "engagement_rate": round(er, 6),
+            },
+            "baseline": {k: round(v, 6) for k, v in baseline.items()},
+        }
+        records.append(record)
+        evaluated.add(video.get("video_id"))
+        print(f"LEARNING LOOP: {video.get('title','')} -> {outcome} (score {score:.2f})")
+
+    return {"updated_at": now.isoformat(), "records": records[-100:], "evaluated_video_ids": list(evaluated)[-200:]}
+
+
+def build_prompt(videos, analytics, retention, history, learning):
     compact = []
     for video in videos:
         row = {
@@ -164,12 +266,15 @@ def build_prompt(videos, analytics, retention, history):
         if rp:
             row["retention_curve"] = rp
         compact.append(row)
+    feedback = learning.get("records", [])[-20:] if isinstance(learning, dict) else []
     return f"""
 You are the performance strategist for THINK FAST DAILY, a YouTube Shorts quiz/brain-challenge channel.
-Analyze ONLY the supplied YouTube performance data and question history. Never invent metrics.
+Analyze ONLY the supplied YouTube performance data, question history and measured strategy outcomes. Never invent metrics.
 When owner Analytics are present, use average view duration, average percentage watched, estimated watch time,
 likes/comments/shares, subscriber conversion and retention curves. Use retention curves to identify early drop-offs,
 strong hold zones and payoff timing.
+Use the STRATEGY OUTCOME HISTORY as actual feedback: reinforce patterns marked WIN, improve or avoid patterns marked LOSS,
+and do not overreact to a single result. If there are fewer than 3 measured outcomes, treat confidence as low.
 Identify repeatable winning quiz formats, topics, hooks, visual styles, difficulty and posting times.
 Penalize repeated questions and weak engagement. Recommend fresh variations, not copies.
 Prefer instantly understandable A/B/C/D challenges with a strong curiosity gap and visual clue.
@@ -194,7 +299,10 @@ YOUTUBE PERFORMANCE + OWNER ANALYTICS:
 {json.dumps(compact, ensure_ascii=False, indent=2)}
 
 QUESTION HISTORY:
-{json.dumps(history[-80:], ensure_ascii=False, indent=2)}
+{json.dumps(history[-80:] if isinstance(history, list) else [], ensure_ascii=False, indent=2)}
+
+STRATEGY OUTCOME HISTORY:
+{json.dumps(feedback, ensure_ascii=False, indent=2)}
 """
 
 
@@ -210,11 +318,23 @@ def is_transient(message):
 
 
 def main():
-    history = load(HISTORY, [])
+    raw_history = load(HISTORY, [])
+    history = raw_history if isinstance(raw_history, list) else []
+    if not isinstance(raw_history, list):
+        print("History format was not a question list; preserving it by using an empty question-history view.")
+
     videos = youtube_public_data()
     if not videos:
         raise RuntimeError("No YouTube performance data found. Check YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID.")
     analytics, retention = youtube_owner_analytics(videos)
+
+    previous_strategy = load(STRATEGY, {})
+    learning = load(LEARNING, {"records": [], "evaluated_video_ids": []})
+    if not isinstance(learning, dict):
+        learning = {"records": [], "evaluated_video_ids": []}
+    learning = evaluate_previous_strategy(videos, analytics, previous_strategy, learning)
+    save(LEARNING, learning)
+
     for video in videos:
         if video["video_id"] in analytics:
             video["owner_analytics"] = analytics[video["video_id"]]
@@ -222,7 +342,8 @@ def main():
         if rp:
             video["retention_curve"] = rp
     source = "youtube_analytics_api"
-    save(HISTORY, {
+    # Keep question history intact. Analytics snapshots live in their own file.
+    save(ANALYTICS_SNAPSHOT, {
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "analytics_source": source,
         "videos": videos[:MAX_VIDEOS],
@@ -237,7 +358,7 @@ def main():
     for model in [requested, "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]:
         if model and model not in models:
             models.append(model)
-    prompt = build_prompt(videos[:MAX_VIDEOS], analytics, retention, history)
+    prompt = build_prompt(videos[:MAX_VIDEOS], analytics, retention, history, learning)
     strategy = None
     last_error = None
     for model in models:
@@ -259,18 +380,23 @@ def main():
                 print("Non-transient model response error; trying next model for resilience.")
     if strategy is None:
         raise RuntimeError(f"All Gemini strategy models failed. Last error: {last_error}")
+
     strategy["generated_at"] = datetime.now(timezone.utc).isoformat()
     strategy["data_source"] = source
     strategy["analytics_source"] = source
     strategy["data_points"] = len(videos)
     strategy["owner_analytics_videos"] = len(analytics)
     strategy["retention_videos"] = len(retention)
+    strategy["learning_records"] = len(learning.get("records", []))
+    strategy["learning_outcomes"] = {k: sum(1 for r in learning.get("records", []) if r.get("outcome") == k) for k in ("WIN", "NEUTRAL", "LOSS")}
+    strategy["learning_feedback_used"] = learning.get("records", [])[-10:]
     save(STRATEGY, strategy)
     print("THINK FAST strategy updated")
     print("Videos analyzed:", len(videos))
     print("Analytics source:", source)
     print("Owner analytics videos:", len(analytics))
     print("Retention reports:", len(retention))
+    print("Learning records:", len(learning.get("records", [])))
     print("Gemini model:", strategy["model_used"])
 
 
