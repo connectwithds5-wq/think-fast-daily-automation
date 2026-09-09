@@ -1,67 +1,117 @@
 {
-  "generated_at": "2026-09-08T17:08:20.096185+00:00",
-  "confidence": "low",
-  "overall_summary": "Performance data array is empty, but question history shows a healthy mix of physics puzzles, history trivia, logic problems, and space science challenges. Titles consistently utilize emojis and curiosity gaps like 'Can You Solve...' or 'What Color Is...'.",
+  "generated_at": "2026-09-09T15:11:46.504195+00:00",
+  "confidence": "medium",
+  "analytics_source": "youtube_analytics_api",
+  "overall_summary": "Analysis of measured YouTube Shorts performance for THINK FAST DAILY reveals exceptionally strong engagement for high-difficulty sequence puzzles (e.g., 'Only 5% Can Solve This Fast IQ Sequence!') reaching 185% average view percentage, alongside solid performance in general knowledge quizzes like geography and history. Content categories focusing on high curiosity gaps, clear spatial or numerical challenges, and immediate visual engagement perform best, while recent unlaunched or late-published clips require scheduling adjustments.",
   "winning_patterns": [
     {
-      "pattern": "Curiosity gap title framing",
-      "evidence": "Titles consistently use challenges like 'Can You Solve...' or 'The Flying Bird Physics Puzzle That Tricks Everyone!'",
-      "action": "Continue framing titles around counter-intuitive results or direct challenges to the viewer."
+      "pattern": "High-Difficulty IQ & Fast Sequence Challenges",
+      "evidence": "'Only 5% Can Solve This Fast IQ Sequence!' achieved 205 views, 97 estimated minutes watched, and a phenomenal 185.04% average view percentage.",
+      "action": "Reinforce this pattern by producing more elite-tier logic puzzles with explicit difficulty filters ('Only 5% Can Solve...') that encourage re-watches."
     },
     {
-      "pattern": "Multidisciplinary variety",
-      "evidence": "History, physics, space, and object guessing categories are evenly rotated in the history.",
-      "action": "Maintain rotation across different science and general knowledge domains to appeal to broad audiences."
+      "pattern": "Broad-Appeal General Knowledge & Geography Questions",
+      "evidence": "'Which Country Has The Most Lakes? 🌊 Geography Quiz!' drove 408 views, 56 estimated minutes watched, and 67.66% average view percentage with 16 likes.",
+      "action": "Continue creating accessible geography and high-interest trivia questions framed around surprising world facts."
+    },
+    {
+      "pattern": "Object Identification & Curious Artifacts",
+      "evidence": "'Guess The Object Quiz!' generated 248 views and 54.84% average view percentage with 10 likes.",
+      "action": "Incorporate visual guessing hooks centered around historical or unexpected utility objects."
     }
   ],
   "improvements": [
     {
-      "pattern": "Missing performance metrics",
-      "evidence": "YouTube performance data array is empty, making it impossible to analyze views, retention, or likes.",
-      "action": "Integrate analytics tracking to evaluate specific category conversion rates."
+      "pattern": "Low Retention on Complex Calendar Trick Questions",
+      "evidence": "'Can You Solve This Calendar Trick Question? 🧠' dropped to 30.89% average view percentage and 10 seconds average view duration.",
+      "action": "Simplify the framing of word/calendar math puzzles so viewers grasp the core premise within the first 2 seconds."
+    },
+    {
+      "pattern": "Zero-View Publishing Windows",
+      "evidence": "Several recent videos published across mid-day and evening hours (e.g., 17:12 UTC) received zero views, indicating sub-optimal timing or lack of algorithmic push.",
+      "action": "Consolidate uploads around proven high-engagement morning windows identified in active analytics."
+    }
+  ],
+  "retention_insights": [
+    {
+      "video_pattern": "Fast IQ Sequence & Numerical Challenges",
+      "drop_or_strength": "strength",
+      "evidence": "'Only 5% Can Solve This Fast IQ Sequence!' maintained an audience watch ratio above 2.0 through 25% of the video progress.",
+      "action": "Keep initial pacing rapid and use on-screen countdown timers to sustain loop viewing and high relative retention."
+    },
+    {
+      "video_pattern": "Geography Trivia ('Which Country Has The Most Lakes?')",
+      "drop_or_strength": "strength",
+      "evidence": "Relative retention remained stable and even increased toward 46% at 49% video progress.",
+      "action": "Structure trivia delivery so the reveal happens right near the midpoint, encouraging viewers to stay until the end."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Afternoon Peak",
-      "hour_utc": 15,
-      "minute_utc": 0,
-      "reason": "Default high-engagement afternoon slot for general audiences due to lack of historical timestamp data.",
-      "confidence": "low"
+      "window": "Early Morning Peak",
+      "hour_utc": 6,
+      "minute_utc": 45,
+      "reason": "Observed successful uploads like 'Which Country Has The Most Lakes?' and 'Can You Solve This Calendar Trick Question?' were published around 06:45 UTC, aligning with high initial engagement.",
+      "confidence": "medium"
     },
     {
-      "window": "Evening Peak",
-      "hour_utc": 20,
-      "minute_utc": 0,
-      "reason": "Default evening leisure slot for general audiences due to lack of historical timestamp data.",
-      "confidence": "low"
+      "window": "Late Morning Peak",
+      "hour_utc": 12,
+      "minute_utc": 40,
+      "reason": "Successful space and physics quizzes like 'Can You Guess Which Planet Spins Backwards?' were published around 12:40 UTC, capturing midday active audiences.",
+      "confidence": "medium"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Optical illusion geometry",
-      "hook": "Which line is actually longer?",
-      "visual_type": "Side-by-side animated lines with rotating perspective",
-      "reason": "Builds on successful visual brain puzzles with instant A/B choices.",
-      "confidence": "medium"
+      "topic": "Advanced visual logic and missing number sequences",
+      "hook": "Only 3% of people can spot the hidden pattern in this grid!",
+      "visual_type": "Clean grid-based numerical or shape puzzle with clear multi-choice options",
+      "reason": "Capitalizes on the massive success of the previous fast IQ sequence puzzle which hit 185% view percentage.",
+      "confidence": "high"
     },
     {
       "priority": 2,
-      "topic": "Daily object macro photography",
-      "hook": "What is this extreme close-up everyday object?",
-      "visual_type": "Zooming out from a macro texture to reveal the item",
-      "reason": "Expands on the 'guess the object' category format.",
+      "topic": "Surprising Earth and geography trivia",
+      "hook": "Which of these countries is actually bigger than it looks on a map?",
+      "visual_type": "Side-by-side map distortion graphic with A/B/C/D choices",
+      "reason": "Leverages high historical engagement from geography challenges like the lakes quiz.",
+      "confidence": "medium"
+    },
+    {
+      "priority": 3,
+      "topic": "Bizarre historical inventions and facts",
+      "hook": "Which surprising item was illegal to own in the 1800s?",
+      "visual_type": "Archival vintage illustration or quick object mockup with timer",
+      "reason": "Taps into successful historical guessing formats with strong curiosity appeal.",
       "confidence": "medium"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Repeated mechanical or thermal physics puzzles",
-      "reason": "Two physics puzzle types (washer and bird in box) were recently used; need fresh topics to prevent fatigue."
+      "item": "Overly convoluted word-based calendar or clock riddles",
+      "reason": "Caused immediate drop-offs and low average view duration (~30%) as seen in the calendar trick test."
+    },
+    {
+      "item": "Repetitive optical illusions without fresh variations",
+      "reason": "Multiple recent variations of optical illusion line-length questions risk audience fatigue and diminishing returns."
     }
   ],
   "model_used": "gemini-3.5-flash-lite",
-  "data_source": "question_history_fallback",
-  "data_points": 0
+  "data_source": "youtube_analytics_api",
+  "data_points": 15,
+  "owner_analytics_videos": 10,
+  "retention_videos": 7,
+  "learning_records": 0,
+  "learning_outcomes": {
+    "WIN": 0,
+    "NEUTRAL": 0,
+    "LOSS": 0
+  },
+  "learning_feedback_used": [],
+  "_learning_state": {
+    "records": [],
+    "evaluated_video_ids": []
+  }
 }
