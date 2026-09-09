@@ -1,6 +1,7 @@
 """Build THINK FAST DAILY strategy from YouTube performance and a persistent learning loop."""
 import json
 import os
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from statistics import median
@@ -35,11 +36,60 @@ def save(path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def youtube_rss_metadata(channel_id):
+    """Read public upload metadata without consuming a YouTube Data API key quota.
+
+    YouTube documents this channel Atom feed for upload notifications. It gives us
+    video id, title and published time; owner performance metrics still come from
+    the authenticated YouTube Analytics API below.
+    """
+    if not channel_id:
+        return []
+    url = "https://www.youtube.com/feeds/videos.xml"
+    response = requests.get(url, params={"channel_id": channel_id}, timeout=30)
+    response.raise_for_status()
+    root = ET.fromstring(response.content)
+    ns = {
+        "atom": "http://www.w3.org/2005/Atom",
+        "yt": "http://www.youtube.com/xml/schemas/2015",
+    }
+    out = []
+    for entry in root.findall("atom:entry", ns):
+        video_id = (entry.findtext("yt:videoId", default="", namespaces=ns) or "").strip()
+        title = (entry.findtext("atom:title", default="", namespaces=ns) or "").strip()
+        published = (entry.findtext("atom:published", default="", namespaces=ns) or "").strip()
+        if not video_id:
+            continue
+        out.append({
+            "video_id": video_id,
+            "title": title,
+            "published_at": published,
+            "views": 0,
+            "likes": 0,
+            "comments": 0,
+            "description_excerpt": "",
+        })
+    return sorted(out, key=lambda x: x.get("published_at") or "", reverse=True)[:MAX_VIDEOS]
+
+
 def youtube_public_data():
+    """Get video metadata/stats, with a no-key RSS fallback.
+
+    YOUTUBE_API_KEY is optional. When present we use the Data API for up to 50
+    uploads. When absent we use the official public channel feed and let the
+    authenticated YouTube Analytics API supply the performance metrics. This
+    matches the workflow's existing OAuth setup and avoids a hard dependency on
+    an otherwise-unused API-key secret.
+    """
     key = os.getenv("YOUTUBE_API_KEY", "").strip()
     channel_id = os.getenv("YOUTUBE_CHANNEL_ID", "").strip()
-    if not key or not channel_id:
+    if not channel_id:
         return []
+
+    if not key:
+        print("YOUTUBE_API_KEY is not configured; using YouTube channel RSS + owner Analytics fallback.")
+        return youtube_rss_metadata(channel_id)
+
     base = "https://www.googleapis.com/youtube/v3"
     r = requests.get(base + "/channels", params={"part": "contentDetails", "id": channel_id, "key": key}, timeout=30)
     r.raise_for_status()
@@ -99,12 +149,14 @@ def youtube_owner_analytics(videos):
     analytics = {}
     for row in report.get("rows", []):
         item = dict(zip(headers, row)); video_id = item.pop("video", None)
-        if video_id: analytics[video_id] = item
+        if video_id:
+            analytics[video_id] = item
 
     retention = {}
     for video in videos[:ANALYTICS_VIDEO_LIMIT]:
         video_id = video.get("video_id"); published = (video.get("published_at") or "")[:10]
-        if not video_id or not published: continue
+        if not video_id or not published:
+            continue
         try:
             rr = api.reports().query(
                 ids="channel==MINE", startDate=published, endDate=today.isoformat(), dimensions="elapsedVideoTimeRatio",
@@ -113,49 +165,77 @@ def youtube_owner_analytics(videos):
             ).execute()
             rh = [h["name"] for h in rr.get("columnHeaders", [])]
             points = [dict(zip(rh, row)) for row in rr.get("rows", [])]
-            if points: retention[video_id] = points
+            if points:
+                retention[video_id] = points
         except Exception as exc:
             print(f"Retention unavailable for {video_id}: {exc}")
     return analytics, retention
 
 
 def summarize_retention(points):
-    if not points: return None
+    if not points:
+        return None
     sampled = []
     for point in points:
         try:
             ratio = float(point.get("elapsedVideoTimeRatio", 0)); watch = float(point.get("audienceWatchRatio", 0)); relative = float(point.get("relativeRetentionPerformance", 0))
-        except (TypeError, ValueError): continue
+        except (TypeError, ValueError):
+            continue
         if ratio <= 0.10 or abs(ratio - 0.25) < 0.02 or abs(ratio - 0.50) < 0.02 or abs(ratio - 0.75) < 0.02 or ratio >= 0.90:
             sampled.append({"video_progress": round(ratio, 3), "audience_watch_ratio": round(watch, 4), "relative_retention": round(relative, 4)})
     return sampled[:15]
 
 
 def parse_dt(value):
-    try: return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(timezone.utc)
-    except Exception: return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(timezone.utc)
+    except Exception:
+        return None
 
 
 def safe_float(value, default=0.0):
-    try: return float(value)
-    except (TypeError, ValueError): return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def merge_analytics_into_videos(videos, analytics):
+    """Backfill public-style counters from the owner Analytics report.
+
+    This is important for the RSS path because RSS intentionally contains no
+    performance counters. Analytics is the authoritative source for those values.
+    """
+    for video in videos:
+        metrics = analytics.get(video.get("video_id"))
+        if not metrics:
+            continue
+        for public_key, analytics_key in (("views", "views"), ("likes", "likes"), ("comments", "comments")):
+            video[public_key] = int(safe_float(metrics.get(analytics_key, 0)))
+    return videos
 
 
 def evaluate_previous_strategy(videos, analytics, previous_strategy, learning):
     """Measure videos published after the previous strategy once they are at least 6 hours old."""
-    if not isinstance(previous_strategy, dict): return learning
+    if not isinstance(previous_strategy, dict):
+        return learning
     generated_at = parse_dt(previous_strategy.get("generated_at"))
-    if not generated_at: return learning
+    if not generated_at:
+        return learning
     evaluated = set(learning.get("evaluated_video_ids", [])); records = list(learning.get("records", []))
     now = datetime.now(timezone.utc)
     candidates = []
     for video in videos:
         vid = video.get("video_id"); published = parse_dt(video.get("published_at"))
-        if not vid or not published or vid in evaluated or published <= generated_at: continue
-        if (now - published).total_seconds() < 6 * 3600: continue
-        if vid not in analytics: continue
+        if not vid or not published or vid in evaluated or published <= generated_at:
+            continue
+        if (now - published).total_seconds() < 6 * 3600:
+            continue
+        if vid not in analytics:
+            continue
         candidates.append(video)
-    if not candidates: return learning
+    if not candidates:
+        return learning
 
     baseline_videos = [v for v in videos if parse_dt(v.get("published_at")) and parse_dt(v.get("published_at")) < generated_at and v.get("video_id") in analytics][:20]
     def metric(video, key): return safe_float(analytics.get(video.get("video_id"), {}).get(key, 0))
@@ -172,8 +252,10 @@ def evaluate_previous_strategy(videos, analytics, previous_strategy, learning):
         views = metric(video, "views"); avp = metric(video, "averageViewPercentage"); avd = metric(video, "averageViewDuration"); er = engagement(video)
         ratios = []
         for actual, base in ((avp, baseline["average_view_percentage"]), (avd, baseline["average_view_duration"]), (er, baseline["engagement_rate"])):
-            if base > 0: ratios.append(actual / base)
-        if baseline["views"] > 0: ratios.append(min(views / baseline["views"], 2.0))
+            if base > 0:
+                ratios.append(actual / base)
+        if baseline["views"] > 0:
+            ratios.append(min(views / baseline["views"], 2.0))
         score = sum(ratios) / len(ratios) if ratios else 1.0
         outcome = "WIN" if score >= 1.10 else "LOSS" if score <= 0.90 else "NEUTRAL"
         records.append({
@@ -192,9 +274,11 @@ def build_prompt(videos, analytics, retention, history, learning):
     compact = []
     for video in videos:
         row = {"title": video["title"], "published_at": video["published_at"], "views": video["views"], "likes": video["likes"], "comments": video["comments"]}
-        if video["video_id"] in analytics: row["youtube_studio"] = analytics[video["video_id"]]
+        if video["video_id"] in analytics:
+            row["youtube_studio"] = analytics[video["video_id"]]
         rp = summarize_retention(retention.get(video["video_id"], []))
-        if rp: row["retention_curve"] = rp
+        if rp:
+            row["retention_curve"] = rp
         compact.append(row)
     feedback = learning.get("records", [])[-20:]
     return f"""
@@ -242,45 +326,60 @@ def is_transient(message):
 def main():
     raw_history = load(HISTORY, [])
     history = raw_history if isinstance(raw_history, list) else []
-    if not isinstance(raw_history, list): print("History format warning: ignoring non-list data for question-history input.")
+    if not isinstance(raw_history, list):
+        print("History format warning: ignoring non-list data for question-history input.")
+
     videos = youtube_public_data()
-    if not videos: raise RuntimeError("No YouTube performance data found. Check YOUTUBE_API_KEY and YOUTUBE_CHANNEL_ID.")
+    if not videos:
+        raise RuntimeError("No YouTube video metadata found. Check YOUTUBE_CHANNEL_ID and the public channel feed.")
+
     analytics, retention = youtube_owner_analytics(videos)
+    videos = merge_analytics_into_videos(videos, analytics)
+    if not analytics:
+        raise RuntimeError("YouTube Analytics returned no video performance rows. Check that YOUTUBE_OAUTH_JSON has valid channel Analytics access.")
 
     previous_strategy = load(STRATEGY, {})
     learning = previous_strategy.get("_learning_state", {}) if isinstance(previous_strategy, dict) else {}
-    if not isinstance(learning, dict): learning = {}
+    if not isinstance(learning, dict):
+        learning = {}
     learning.setdefault("records", []); learning.setdefault("evaluated_video_ids", [])
     learning = evaluate_previous_strategy(videos, analytics, previous_strategy, learning)
 
     for video in videos:
-        if video["video_id"] in analytics: video["owner_analytics"] = analytics[video["video_id"]]
+        if video["video_id"] in analytics:
+            video["owner_analytics"] = analytics[video["video_id"]]
         rp = summarize_retention(retention.get(video["video_id"], []))
-        if rp: video["retention_curve"] = rp
+        if rp:
+            video["retention_curve"] = rp
     source = "youtube_analytics_api"
     save(ANALYTICS_SNAPSHOT, {"updated_at": datetime.now(timezone.utc).isoformat(), "analytics_source": source, "videos": videos[:MAX_VIDEOS]})
 
     key = os.getenv("GEMINI_API_KEY", "").strip()
-    if not key: raise RuntimeError("GEMINI_API_KEY is missing")
+    if not key:
+        raise RuntimeError("GEMINI_API_KEY is missing")
     client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=12000, retry_options=types.HttpRetryOptions(attempts=1)))
     requested = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
     models = []
     for model in [requested, "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]:
-        if model and model not in models: models.append(model)
+        if model and model not in models:
+            models.append(model)
     prompt = build_prompt(videos[:MAX_VIDEOS], analytics, retention, history, learning)
     strategy = None; last_error = None
     for model in models:
         try:
             print(f"Trying Gemini strategy model: {model}"); strategy = generate_strategy(client, model, prompt)
-            if not isinstance(strategy, dict): raise RuntimeError("Gemini strategy response was not a JSON object")
+            if not isinstance(strategy, dict):
+                raise RuntimeError("Gemini strategy response was not a JSON object")
             strategy["model_used"] = model; print(f"Strategy SUCCESS with {model}"); break
         except Exception as exc:
             last_error = exc; print(f"Gemini strategy model failed: {model}: {exc}")
             if not is_transient(exc):
                 message = str(exc).lower()
-                if any(token in message for token in ("401", "403", "api key", "authentication", "permission denied")): raise
+                if any(token in message for token in ("401", "403", "api key", "authentication", "permission denied")):
+                    raise
                 print("Non-transient model response error; trying next model for resilience.")
-    if strategy is None: raise RuntimeError(f"All Gemini strategy models failed. Last error: {last_error}")
+    if strategy is None:
+        raise RuntimeError(f"All Gemini strategy models failed. Last error: {last_error}")
 
     strategy["generated_at"] = datetime.now(timezone.utc).isoformat()
     strategy["data_source"] = source; strategy["analytics_source"] = source
@@ -295,4 +394,5 @@ def main():
     print("Gemini model:", strategy["model_used"])
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
