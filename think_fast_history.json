@@ -72,5 +72,18 @@
     "category": "animal",
     "title": "Can you guess this animal fact? Which animal is known for changing its skin color to communicate and camouflage? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "Which of these continents receives the least annual precipitation, making it the driest on the planet?",
+    "answer": "C",
+    "category": "guess the country",
+    "title": "Which Continent Is The Driest? 🌎 Brain Quiz"
+  },
+  {
+    "question": "Which is the largest ocean on Earth?",
+    "answer": "C",
+    "category": "geography",
+    "title": "Quick geography challenge! Which is the largest ocean on Earth? #shorts",
+    "source": "offline_fallback"
   }
 ]

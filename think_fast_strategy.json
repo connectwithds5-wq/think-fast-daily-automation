@@ -1,108 +1,95 @@
 {
-  "generated_at": "2026-09-09T15:11:46.504195+00:00",
-  "confidence": "medium",
+  "generated_at": "2026-09-10T07:34:57.225890+00:00",
+  "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Analysis of measured YouTube Shorts performance for THINK FAST DAILY reveals exceptionally strong engagement for high-difficulty sequence puzzles (e.g., 'Only 5% Can Solve This Fast IQ Sequence!') reaching 185% average view percentage, alongside solid performance in general knowledge quizzes like geography and history. Content categories focusing on high curiosity gaps, clear spatial or numerical challenges, and immediate visual engagement perform best, while recent unlaunched or late-published clips require scheduling adjustments.",
+  "overall_summary": "Analysis of THINK FAST DAILY performance data shows strong initial engagement for specific trivia and geography challenges like 'Which Country Has The Most Lakes?' (414 views, 16 likes) and history trivia (137.04% average view percentage). However, multiple recent shorts received 0 views due to delivery/algorithm timing or lack of immediate hook traction. Retention drops significantly past the opening seconds if the question isn't instantly clear or visually compelling. Confidence remains low as strategy outcome history is currently empty and many videos have zero recorded data.",
   "winning_patterns": [
     {
-      "pattern": "High-Difficulty IQ & Fast Sequence Challenges",
-      "evidence": "'Only 5% Can Solve This Fast IQ Sequence!' achieved 205 views, 97 estimated minutes watched, and a phenomenal 185.04% average view percentage.",
-      "action": "Reinforce this pattern by producing more elite-tier logic puzzles with explicit difficulty filters ('Only 5% Can Solve...') that encourage re-watches."
+      "pattern": "High-Curiosity Geography and History Trivia",
+      "evidence": "Titles like 'Which Country Has The Most Lakes? 🌊 Geography Quiz!' achieved 414 views and 16 likes, while 'Which Came First? 🧠 History Trivia Quiz!' gained an exceptional 137.04% average view percentage.",
+      "action": "Produce more fast-paced geographic and comparative history quizzes that challenge common assumptions."
     },
     {
-      "pattern": "Broad-Appeal General Knowledge & Geography Questions",
-      "evidence": "'Which Country Has The Most Lakes? 🌊 Geography Quiz!' drove 408 views, 56 estimated minutes watched, and 67.66% average view percentage with 16 likes.",
-      "action": "Continue creating accessible geography and high-interest trivia questions framed around surprising world facts."
-    },
-    {
-      "pattern": "Object Identification & Curious Artifacts",
-      "evidence": "'Guess The Object Quiz!' generated 248 views and 54.84% average view percentage with 10 likes.",
-      "action": "Incorporate visual guessing hooks centered around historical or unexpected utility objects."
+      "pattern": "Space and Physics Challenges with Clear Subject Matter",
+      "evidence": "Videos like 'Can You Guess Which Planet Spins Backwards?' earned 320 views and 7 likes with a 60.11% average view percentage.",
+      "action": "Continue utilizing accessible space and science trivia that presents a counter-intuitive fact as the answer."
     }
   ],
   "improvements": [
     {
-      "pattern": "Low Retention on Complex Calendar Trick Questions",
-      "evidence": "'Can You Solve This Calendar Trick Question? 🧠' dropped to 30.89% average view percentage and 10 seconds average view duration.",
-      "action": "Simplify the framing of word/calendar math puzzles so viewers grasp the core premise within the first 2 seconds."
+      "pattern": "Low Initial Hook Traction and Zero-View Outliers",
+      "evidence": "Several recent uploads published mid-day or afternoon (e.g., around 14:00-17:00 UTC) recorded 0 views.",
+      "action": "Refine opening visual hooks to immediately display the question prompt in the first frame and optimize testing of upload windows."
     },
     {
-      "pattern": "Zero-View Publishing Windows",
-      "evidence": "Several recent videos published across mid-day and evening hours (e.g., 17:12 UTC) received zero views, indicating sub-optimal timing or lack of algorithmic push.",
-      "action": "Consolidate uploads around proven high-engagement morning windows identified in active analytics."
+      "pattern": "Complex Logic/Calendar Puzzles Causing Early Drop-offs",
+      "evidence": "'Can You Solve This Calendar Trick Question?' resulted in a low 30.89% average view percentage and only 10 seconds average view duration.",
+      "action": "Avoid overly wordy or math-heavy calendar riddles; favor visual physics or quick-fire multiple-choice options."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "Fast IQ Sequence & Numerical Challenges",
+      "video_pattern": "History Trivia Quiz",
       "drop_or_strength": "strength",
-      "evidence": "'Only 5% Can Solve This Fast IQ Sequence!' maintained an audience watch ratio above 2.0 through 25% of the video progress.",
-      "action": "Keep initial pacing rapid and use on-screen countdown timers to sustain loop viewing and high relative retention."
+      "evidence": "'Which Came First? 🧠 History Trivia Quiz!' maintained audience watch ratios above 1.8x at the start and 1.3x near the halfway mark.",
+      "action": "Emulate this pacing by introducing a stark comparison right at second zero to spike initial relative retention."
     },
     {
-      "video_pattern": "Geography Trivia ('Which Country Has The Most Lakes?')",
-      "drop_or_strength": "strength",
-      "evidence": "Relative retention remained stable and even increased toward 46% at 49% video progress.",
-      "action": "Structure trivia delivery so the reveal happens right near the midpoint, encouraging viewers to stay until the end."
+      "video_pattern": "Calendar / Trick Puzzles",
+      "drop_or_strength": "drop",
+      "evidence": "Audience watch ratio plummeted sharply below 0.5 within the first quarter of the video on calendar puzzle formats.",
+      "action": "Keep phrasing ultra-concise and remove any reading friction in the initial hook."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Early Morning Peak",
+      "window": "Early Morning UTC Cluster",
       "hour_utc": 6,
       "minute_utc": 45,
-      "reason": "Observed successful uploads like 'Which Country Has The Most Lakes?' and 'Can You Solve This Calendar Trick Question?' were published around 06:45 UTC, aligning with high initial engagement.",
-      "confidence": "medium"
+      "reason": "Observed high-performing uploads like 'Which Country Has The Most Lakes?' were published around 06:45 UTC and captured strong initial traction.",
+      "confidence": "low"
     },
     {
-      "window": "Late Morning Peak",
+      "window": "Late Morning UTC Cluster",
       "hour_utc": 12,
       "minute_utc": 40,
-      "reason": "Successful space and physics quizzes like 'Can You Guess Which Planet Spins Backwards?' were published around 12:40 UTC, capturing midday active audiences.",
-      "confidence": "medium"
+      "reason": "Space and science quizzes published around midday (e.g., 12:40 UTC) secured strong baseline engagement and reliable view counts.",
+      "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Advanced visual logic and missing number sequences",
-      "hook": "Only 3% of people can spot the hidden pattern in this grid!",
-      "visual_type": "Clean grid-based numerical or shape puzzle with clear multi-choice options",
-      "reason": "Capitalizes on the massive success of the previous fast IQ sequence puzzle which hit 185% view percentage.",
-      "confidence": "high"
+      "topic": "Geography & Extreme Earth Facts",
+      "hook": "Which continent is actually the driest on Earth? (Hint: It's not Africa!)",
+      "visual_type": "Animated globe with A/B/C/D multiple-choice options flashing on screen",
+      "reason": "Builds directly on the high performance of the lakes and space quiz formats.",
+      "confidence": "low"
     },
     {
       "priority": 2,
-      "topic": "Surprising Earth and geography trivia",
-      "hook": "Which of these countries is actually bigger than it looks on a map?",
-      "visual_type": "Side-by-side map distortion graphic with A/B/C/D choices",
-      "reason": "Leverages high historical engagement from geography challenges like the lakes quiz.",
-      "confidence": "medium"
-    },
-    {
-      "priority": 3,
-      "topic": "Bizarre historical inventions and facts",
-      "hook": "Which surprising item was illegal to own in the 1800s?",
-      "visual_type": "Archival vintage illustration or quick object mockup with timer",
-      "reason": "Taps into successful historical guessing formats with strong curiosity appeal.",
-      "confidence": "medium"
+      "topic": "Surprising Historical Inventions",
+      "hook": "Which came first: the telephone or the invention of the bicycle?",
+      "visual_type": "Side-by-side archival image comparison with a countdown timer",
+      "reason": "Capitalizes on the exceptional retention and engagement seen on previous history comparison quizzes.",
+      "confidence": "low"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Overly convoluted word-based calendar or clock riddles",
-      "reason": "Caused immediate drop-offs and low average view duration (~30%) as seen in the calendar trick test."
+      "item": "Repeated Optical Illusion Questions",
+      "reason": "Multiple variations of optical illusion line-length questions have already been posted without driving distinct growth."
     },
     {
-      "item": "Repetitive optical illusions without fresh variations",
-      "reason": "Multiple recent variations of optical illusion line-length questions risk audience fatigue and diminishing returns."
+      "item": "Wordy Calendar or Math Puzzles",
+      "reason": "Low average view percentages and short watch durations indicate viewers quickly bounce when presented with complex text riddles."
     }
   ],
   "model_used": "gemini-3.5-flash-lite",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
-  "owner_analytics_videos": 10,
-  "retention_videos": 7,
+  "owner_analytics_videos": 11,
+  "retention_videos": 8,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,
