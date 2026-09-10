@@ -1,95 +1,95 @@
 {
-  "generated_at": "2026-09-10T07:34:57.225890+00:00",
+  "generated_at": "2026-09-10T12:52:49.641830+00:00",
   "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Analysis of THINK FAST DAILY performance data shows strong initial engagement for specific trivia and geography challenges like 'Which Country Has The Most Lakes?' (414 views, 16 likes) and history trivia (137.04% average view percentage). However, multiple recent shorts received 0 views due to delivery/algorithm timing or lack of immediate hook traction. Retention drops significantly past the opening seconds if the question isn't instantly clear or visually compelling. Confidence remains low as strategy outcome history is currently empty and many videos have zero recorded data.",
+  "overall_summary": "Analysis of 14 Shorts reveals strong performance in history trivia and comparative geography/space questions, led by 'Which Came First? History Trivia Quiz!' (137.04% average percentage watched, 47s AVD) and 'Which Country Has The Most Lakes?' (414 views, 67.66% AVP). Abstract or text-heavy math/calendar puzzles suffered lower retention (30.89% AVP). With zero strategy outcome logs available, overall confidence remains low.",
   "winning_patterns": [
     {
-      "pattern": "High-Curiosity Geography and History Trivia",
-      "evidence": "Titles like 'Which Country Has The Most Lakes? 🌊 Geography Quiz!' achieved 414 views and 16 likes, while 'Which Came First? 🧠 History Trivia Quiz!' gained an exceptional 137.04% average view percentage.",
-      "action": "Produce more fast-paced geographic and comparative history quizzes that challenge common assumptions."
+      "pattern": "Chronological/Historical Comparison Trivia",
+      "evidence": "'Which Came First? History Trivia Quiz!' generated 137.04% AVP, 47s AVD, and 72 estimated minutes watched across 247 views.",
+      "action": "Produce more historical timeline and comparative 'Which came first' visual quizzes."
     },
     {
-      "pattern": "Space and Physics Challenges with Clear Subject Matter",
-      "evidence": "Videos like 'Can You Guess Which Planet Spins Backwards?' earned 320 views and 7 likes with a 60.11% average view percentage.",
-      "action": "Continue utilizing accessible space and science trivia that presents a counter-intuitive fact as the answer."
+      "pattern": "Fact-Based Geography & Space Challenges",
+      "evidence": "'Which Country Has The Most Lakes?' achieved the highest view count (414 views, 67.66% AVP, 16 likes) and 'Which Planet Spins Backwards?' reached 320 views (60.11% AVP).",
+      "action": "Double down on clear A/B/C/D multiple-choice quizzes focused on surprising earth and space records."
     }
   ],
   "improvements": [
     {
-      "pattern": "Low Initial Hook Traction and Zero-View Outliers",
-      "evidence": "Several recent uploads published mid-day or afternoon (e.g., around 14:00-17:00 UTC) recorded 0 views.",
-      "action": "Refine opening visual hooks to immediately display the question prompt in the first frame and optimize testing of upload windows."
+      "pattern": "Text-heavy calendar and word trick questions",
+      "evidence": "'Can You Solve This Calendar Trick Question?' dropped to 30.89% AVP and 10s AVD.",
+      "action": "Shift focus away from abstract calendar calculations toward visual physics and trivia setups."
     },
     {
-      "pattern": "Complex Logic/Calendar Puzzles Causing Early Drop-offs",
-      "evidence": "'Can You Solve This Calendar Trick Question?' resulted in a low 30.89% average view percentage and only 10 seconds average view duration.",
-      "action": "Avoid overly wordy or math-heavy calendar riddles; favor visual physics or quick-fire multiple-choice options."
+      "pattern": "Generic non-descriptive titles",
+      "evidence": "'Can You Pass This Tricky Brain Test?' yielded only 1 view and 0% AVP.",
+      "action": "Always specify the core topic/subject in the title rather than relying on generic 'brain test' phrasing."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "History Trivia Quiz",
+      "video_pattern": "Historical timeline reveal format",
       "drop_or_strength": "strength",
-      "evidence": "'Which Came First? 🧠 History Trivia Quiz!' maintained audience watch ratios above 1.8x at the start and 1.3x near the halfway mark.",
-      "action": "Emulate this pacing by introducing a stark comparison right at second zero to spike initial relative retention."
+      "evidence": "Audience watch ratio started at 1.9195 (progress 0.01) and remained above 1.3218 at progress 0.49 for 'Which Came First?'.",
+      "action": "Maintain loopable structured reveals with clear countdowns that encourage re-watching."
     },
     {
-      "video_pattern": "Calendar / Trick Puzzles",
+      "video_pattern": "Calendar logic puzzle",
       "drop_or_strength": "drop",
-      "evidence": "Audience watch ratio plummeted sharply below 0.5 within the first quarter of the video on calendar puzzle formats.",
-      "action": "Keep phrasing ultra-concise and remove any reading friction in the initial hook."
+      "evidence": "Audience watch ratio plummeted from 1.0588 at 0.01 progress to 0.1765 at 0.49 progress.",
+      "action": "Simplify question framing visually within the first 3 seconds to prevent early drop-offs."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Early Morning UTC Cluster",
+      "window": "Early Morning UTC",
       "hour_utc": 6,
       "minute_utc": 45,
-      "reason": "Observed high-performing uploads like 'Which Country Has The Most Lakes?' were published around 06:45 UTC and captured strong initial traction.",
+      "reason": "Top viewing performance observed on 'Which Country Has The Most Lakes?' (414 views) published at 06:45 UTC.",
       "confidence": "low"
     },
     {
-      "window": "Late Morning UTC Cluster",
-      "hour_utc": 12,
-      "minute_utc": 40,
-      "reason": "Space and science quizzes published around midday (e.g., 12:40 UTC) secured strong baseline engagement and reliable view counts.",
+      "window": "Mid Morning UTC",
+      "hour_utc": 8,
+      "minute_utc": 23,
+      "reason": "Highest retention video 'Which Came First?' (137.04% AVP) was posted at 08:23 UTC.",
       "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Geography & Extreme Earth Facts",
-      "hook": "Which continent is actually the driest on Earth? (Hint: It's not Africa!)",
-      "visual_type": "Animated globe with A/B/C/D multiple-choice options flashing on screen",
-      "reason": "Builds directly on the high performance of the lakes and space quiz formats.",
-      "confidence": "low"
+      "topic": "History Trivia",
+      "hook": "Which landmark was constructed FIRST?",
+      "visual_type": "Side-by-side historical photo split screen with A/B/C choices and a 5-second timer",
+      "reason": "'Which Came First?' demonstrated massive re-watchability and highest overall watch duration.",
+      "confidence": "medium"
     },
     {
       "priority": 2,
-      "topic": "Surprising Historical Inventions",
-      "hook": "Which came first: the telephone or the invention of the bicycle?",
-      "visual_type": "Side-by-side archival image comparison with a countdown timer",
-      "reason": "Capitalizes on the exceptional retention and engagement seen on previous history comparison quizzes.",
-      "confidence": "low"
+      "topic": "Geography Records",
+      "hook": "Which country borders the most nations on Earth?",
+      "visual_type": "Highlighted 3D globe visualization with four labeled country options",
+      "reason": "Geography topics generated the highest total views (414 views) and highest engagement/likes count (16 likes).",
+      "confidence": "medium"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Repeated Optical Illusion Questions",
-      "reason": "Multiple variations of optical illusion line-length questions have already been posted without driving distinct growth."
+      "item": "Repeated line-length optical illusions",
+      "reason": "Question history shows multiple variations of line-length optical illusions already executed; audience needs fresh visual formats."
     },
     {
-      "item": "Wordy Calendar or Math Puzzles",
-      "reason": "Low average view percentages and short watch durations indicate viewers quickly bounce when presented with complex text riddles."
+      "item": "Abstract calendar arithmetic math problems",
+      "reason": "Generated lowest retention (30.89% AVP) and weak viewer hold past the first 3 seconds."
     }
   ],
-  "model_used": "gemini-3.5-flash-lite",
+  "model_used": "gemini-3.6-flash",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
   "owner_analytics_videos": 11,
-  "retention_videos": 8,
+  "retention_videos": 7,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,

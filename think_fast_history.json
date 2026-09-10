@@ -85,5 +85,30 @@
     "category": "geography",
     "title": "Quick geography challenge! Which is the largest ocean on Earth? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "Which of these iconic world landmarks was constructed first in history?",
+    "answer": "B",
+    "category": "visual brain puzzle",
+    "title": "Which Famous Landmark Was Built FIRST? | History Trivia"
+  },
+  {
+    "question": "Which of these famous global landmarks was completed earliest in history?",
+    "answer": "B",
+    "category": "emoji guessing challenge",
+    "title": "Can You Guess Which Famous Landmark Was Built First? 🏛️ | History Trivia"
+  },
+  {
+    "question": "Which of these famous structures was built earliest in history?",
+    "answer": "C",
+    "category": "tricky logic puzzle",
+    "title": "Which Landmark Was Built First? Test Your History Knowledge!"
+  },
+  {
+    "question": "What is the closest star to Earth after the Sun?",
+    "answer": "C",
+    "category": "space",
+    "title": "Space fans, get this right! What is the closest star to Earth after the Sun? #shorts",
+    "source": "offline_fallback"
   }
 ]
