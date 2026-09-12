@@ -1,94 +1,94 @@
 {
-  "generated_at": "2026-09-11T12:54:32.171018+00:00",
+  "generated_at": "2026-09-12T08:33:21.664644+00:00",
   "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Analysis of THINK FAST DAILY performance data shows strong engagement with space, geography, and physics/history trivia challenges. Videos like 'Which Country Has The Most Lakes?' and 'Which Came First? 🧠 History Trivia Quiz!' achieved exceptional average view percentages (>100%) and solid view counts, while recent uploads suffered from zero views due to timing or lack of algorithmic pickup. Retention is highest when questions feature instantly understandable visual clues and strong curiosity gaps.",
+  "overall_summary": "Think Fast Daily is testing various short-form quiz topics ranging from physics puzzles to space and history. While some recent uploads have zero views (likely due to immediate publish timing or algorithm testing), top performers like 'Which Came First? 🧠 History Trivia Quiz!' and planet/physics puzzles achieve solid engagement and high average view percentages (over 50-60%, and up to 135% for history trivia). However, confidence remains low due to fewer than 3 fully measured outcomes with extensive feedback loops.",
   "winning_patterns": [
     {
-      "pattern": "Geography and Space Trivia Questions",
-      "evidence": "'Which Country Has The Most Lakes? 🌊 Geography Quiz!' reached 421 views and 66.91% average view percentage; 'What Color Is a Sunset on Mars? 🪐 Space Quiz!' reached 417 views and 51.68% average view percentage.",
-      "action": "Continue producing high-interest geography and space trivia quizzes with clear A/B/C/D choices."
+      "pattern": "Surprising historical timeline quizzes",
+      "evidence": "'Which Came First? 🧠 History Trivia Quiz!' achieved 249 views and an extraordinary 135.81% average view percentage.",
+      "action": "Produce more sequencing and timeline-based history challenges with unexpected ordering."
     },
     {
-      "pattern": "History Chronology Challenges",
-      "evidence": "'Which Came First? 🧠 History Trivia Quiz!' achieved 249 views and an extraordinary 135.81% average view percentage.",
-      "action": "Produce fresh chronological ordering and 'which came first' historical landmark challenges."
+      "pattern": "Counter-intuitive space & physics puzzles",
+      "evidence": "'What Color Is a Sunset on Mars? 🪐 Space Quiz!' and 'The Physics Ring Puzzle!' garnered 441 and 303 views with ~52% to 60% average view percentages.",
+      "action": "Continue creating high-curiosity science and space challenges that defy common assumptions."
     }
   ],
   "improvements": [
     {
-      "pattern": "Zero-View Uploads & Timing Issues",
-      "evidence": "Recent shorts published on Sep 10 and Sep 11 ('Space fans, get this right!', 'One tiny clue gives it away!') recorded 0 views.",
-      "action": "Align publish times strictly with proven high-performing traffic windows (UTC morning slots) and avoid erratic scheduling."
+      "pattern": "Generic animal or basic science facts",
+      "evidence": "Recent fallback titles like fastest land animal or plant gas absorption currently show zero views.",
+      "action": "Avoid straightforward trivia that lacks a strong curiosity gap or counter-intuitive twist."
     },
     {
-      "pattern": "Low Retention on Complex Calendar / Word Trick Questions",
-      "evidence": "'Can You Solve This Calendar Trick Question? 🧠' dropped to 30.89% average view percentage.",
-      "action": "Avoid overly convoluted calendar or wordplay trick questions that confuse viewers early; prioritize instant visual comprehension."
+      "pattern": "Repetitive optical illusion formatting",
+      "evidence": "Multiple sequential variations of line-length illusions led to diminishing returns.",
+      "action": "Shift focus away from repetitive visual illusions toward fresh conceptual or historical puzzles."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "History Trivia ('Which Came First?')",
+      "video_pattern": "History Timeline Quiz",
       "drop_or_strength": "strength",
-      "evidence": "Audience watch ratio stayed above 1.8x at the start and remained high throughout the video (135.81% average view percentage).",
-      "action": "Use strong historical comparison hooks that compel viewers to re-watch or pause to check facts."
+      "evidence": "Audience watch ratio remained well above 1.5x through 49% of the video progress on history trivia.",
+      "action": "Keep the initial reveal tight and use sequential comparison to sustain high loop/rewatch rates."
     },
     {
-      "video_pattern": "Geography Quiz ('Which Country Has The Most Lakes?')",
+      "video_pattern": "Physics & Space Challenges",
       "drop_or_strength": "strength",
-      "evidence": "Initial watch ratio exceeded 1.23x with steady retention across the mid-point.",
-      "action": "Start geography shorts immediately with the map or country options visible on screen during the hook."
+      "evidence": "Maintains above 1.0x relative retention in the crucial first 10% of video progress.",
+      "action": "Use bold visual framing in the first 2 seconds to hook viewers instantly."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Early UTC Morning Window",
-      "hour_utc": 6,
-      "minute_utc": 45,
-      "reason": "Observed on successful uploads like 'Which Country Has The Most Lakes?' (published at 06:45:45 UTC).",
-      "confidence": "medium"
+      "window": "Morning Peak",
+      "hour_utc": 7,
+      "minute_utc": 38,
+      "reason": "Observed successful publish timestamp cluster around early morning hours.",
+      "confidence": "low"
     },
     {
-      "window": "Late Morning UTC Window",
+      "window": "Afternoon Peak",
       "hour_utc": 12,
-      "minute_utc": 5,
-      "reason": "Observed on high-performing space quiz uploads like 'What Color Is a Sunset on Mars?' (published at 12:05:14 UTC).",
-      "confidence": "medium"
+      "minute_utc": 45,
+      "reason": "Observed successful publish timestamp cluster around midday.",
+      "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Geography & Extreme Earth Facts",
-      "hook": "Can you guess which country has more volcanoes than any other?",
-      "visual_type": "Animated globe with map highlights and A/B/C/D options",
-      "reason": "Geography formats like lake counts drove high viewership and engagement.",
-      "confidence": "medium"
+      "topic": "Surprising Historical Inventions",
+      "hook": "Which everyday object was invented during ancient times when it shouldn't have been?",
+      "visual_type": "A/B/C/D object comparison",
+      "reason": "History timeline formats demonstrated exceptional watch duration and replay value.",
+      "confidence": "low"
     },
     {
       "priority": 2,
-      "topic": "Space & Planetary Science",
-      "hook": "Which planet's moon has an atmosphere thicker than Earth's?",
-      "visual_type": "Space background with planetary graphics and countdown timer",
-      "reason": "Space quizzes consistently yield high watch percentages and subscriber conversion.",
-      "confidence": "medium"
+      "topic": "Deep Space Anomaly",
+      "hook": "What would actually happen if you dropped an object on this planet?",
+      "visual_type": "Animated physics simulation",
+      "reason": "Space and physics quizzes consistently secure strong view counts and engagement.",
+      "confidence": "low"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Convoluted Calendar & Word Logic Puzzles",
-      "reason": "Led to poor retention (e.g., 30.89% on calendar trick) and low engagement."
+      "item": "Overly simple animal and plant biology facts",
+      "reason": "Results in low initial traction and fails to stimulate curiosity."
     },
     {
-      "item": "Repeated Basic Science Definitions",
-      "reason": "Basic photosynthesis and plant questions receive low traction compared to counter-intuitive space or geography facts."
+      "item": "Directly repeating optical illusion questions",
+      "reason": "Causes audience fatigue after multiple similar iterations."
     }
   ],
   "model_used": "gemini-3.5-flash-lite",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
-  "owner_analytics_videos": 15,
+  "owner_analytics_videos": 16,
   "retention_videos": 11,
   "learning_records": 0,
   "learning_outcomes": {

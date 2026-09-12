@@ -154,5 +154,36 @@
     "category": "animal",
     "title": "This animal question looks easy... Which animal is the fastest land animal? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "Which of these everyday conveniences was actually invented in Ancient Greece over 2,000 years ago?",
+    "answer": "A",
+    "category": "science brain teaser",
+    "title": "You Won't Believe What Ancient Greeks Invented! 🏛️ #shorts"
+  },
+  {
+    "question": "Which of these medical devices was surprisingly invented over 3,000 years ago?",
+    "answer": "B",
+    "category": "tricky logic puzzle",
+    "title": "You Won't Believe How Old This Invention Is! 😲"
+  },
+  {
+    "question": "Which of these surprisingly modern-seeming devices was actually invented in ancient Alexandria by Hero around the 1st century AD?",
+    "answer": "B",
+    "category": "tricky logic puzzle",
+    "title": "Which Ancient Invention Defies History? 🏛️ #shorts"
+  },
+  {
+    "question": "Which of these surprisingly complex devices was invented by the Ancient Greeks over 2,000 years ago?",
+    "answer": "A",
+    "category": "common knowledge trick question",
+    "title": "Ancient Tech You Won't Believe Exists | Brain Quiz"
+  },
+  {
+    "question": "Which country is shaped like a boot?",
+    "answer": "B",
+    "category": "geography",
+    "title": "Can you beat the clock? Which country is shaped like a boot? #shorts",
+    "source": "offline_fallback"
   }
 ]
