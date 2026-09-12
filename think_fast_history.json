@@ -185,5 +185,36 @@
     "category": "geography",
     "title": "Can you beat the clock? Which country is shaped like a boot? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "When an ice cube melts in a glass filled to the brim, what happens?",
+    "answer": "B",
+    "category": "quick IQ challenge",
+    "title": "The Ice Cube Physics Trick Most People Get Wrong! 🧊🧠"
+  },
+  {
+    "question": "If you accelerate forward in a car, which way does a floating helium balloon move?",
+    "answer": "B",
+    "category": "common knowledge trick question",
+    "title": "The Helium Balloon Physics Paradox!"
+  },
+  {
+    "question": "If you drop a heavy steel ball and a hollow plastic ball of the exact same size in a vacuum, which hits the ground first?",
+    "answer": "C",
+    "category": "tricky logic puzzle",
+    "title": "Can you solve this tricky physics trick? #shorts"
+  },
+  {
+    "question": "If you hold a raw egg and a hard-boiled egg and spin them on a table, which stops spinning first?",
+    "answer": "A",
+    "category": "emoji guessing challenge",
+    "title": "Can you solve this raw vs. boiled egg physics puzzle?"
+  },
+  {
+    "question": "How many sides does a hexagon have?",
+    "answer": "B",
+    "category": "trivia",
+    "title": "Most people rush this answer! How many sides does a hexagon have? #shorts",
+    "source": "offline_fallback"
   }
 ]
