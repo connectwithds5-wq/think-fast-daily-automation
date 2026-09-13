@@ -216,5 +216,24 @@
     "category": "trivia",
     "title": "Most people rush this answer! How many sides does a hexagon have? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "If you blow air directly between two hanging ping-pong balls, what happens?",
+    "answer": "B",
+    "category": "guess the object",
+    "title": "The Physics Intuition Trap Most People Get Wrong!"
+  },
+  {
+    "question": "If you drive a car at 60 mph and fire a projectile backward at 60 mph, what happens?",
+    "answer": "B",
+    "category": "number pattern puzzle",
+    "title": "Physics Intuition Trap: Can You Solve This?"
+  },
+  {
+    "question": "What force keeps planets in orbit around the Sun?",
+    "answer": "C",
+    "category": "science",
+    "title": "Think before you choose! What force keeps planets in orbit around the Sun? #shorts",
+    "source": "offline_fallback"
   }
 ]
