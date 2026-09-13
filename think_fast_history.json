@@ -266,5 +266,18 @@
     "category": "space",
     "title": "A cosmic question in five seconds! Which planet is known as the Red Planet? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "Which unusual celestial body is famous for having a shape resembling a giant rubber duck?",
+    "answer": "B",
+    "category": "science brain teaser",
+    "title": "Can You Spot This Bizarre Space Anomaly?"
+  },
+  {
+    "question": "Which number comes next: 2, 4, 8, 16, ?",
+    "answer": "C",
+    "category": "trivia",
+    "title": "Can you solve this instantly? Which number comes next: 2, 4, 8, 16, ? #shorts",
+    "source": "offline_fallback"
   }
 ]
