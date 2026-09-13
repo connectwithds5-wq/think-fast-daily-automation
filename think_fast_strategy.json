@@ -1,71 +1,107 @@
 {
-  "generated_at": "2026-09-13T07:37:45.541282+00:00",
+  "generated_at": "2026-09-13T12:58:00.344094+00:00",
   "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Performance is currently inconsistent with extremely low initial velocity on recent uploads. Data shows strong retention for 'Which Came First' style logic puzzles and 'Physics Paradox' content. Simple, direct trivia (geography/shapes) performs moderately, but basic common knowledge questions show signs of audience fatigue. Increasing the visual curiosity gap and decreasing the time-to-question is critical.",
+  "overall_summary": "Analysis of 15 recent Shorts shows top performance driven by curiosity-focused space and animal trivia ('What Color Is a Sunset on Mars?' at 450 views and 'Which animal is known for changing its skin color...' at 383 views, 25 likes, and 1 subscriber). Average view percentage peaked at 75.68% on concise, clear geography trivia ('Which is the largest ocean on Earth?'). Conversely, five recent uploads currently have 0 recorded views, and question history shows repeated recycling of identical concepts (e.g., optical illusion lines, Greek inventions, and landmark dates). Confidence remains low due to zero measured strategy outcomes in history.",
   "winning_patterns": [
     {
-      "pattern": "Physics Paradox / Logic Puzzles",
-      "evidence": "Videos like 'The Physics Ring Puzzle' and 'Which Came First' maintain longer average view durations and higher engagement compared to basic trivia.",
-      "action": "Prioritize physical demonstration-based questions where the viewer feels they can test their intuition."
+      "pattern": "Curiosity gap astronomy and surprising natural science questions",
+      "evidence": "'What Color Is a Sunset on Mars?' generated the channel high of 450 views, 53 estimated minutes watched, and 1 subscriber. 'Only sharp minds get this one! Which planet has the most prominent ring system?' earned 234 views and 17 likes.",
+      "action": "Prioritize vivid planetary and space perception questions featuring unexpected facts and crisp multi-choice options."
+    },
+    {
+      "pattern": "Concise, high-clarity trivia with strong pacing",
+      "evidence": "'Quick geography challenge! Which is the largest ocean on Earth?' achieved the highest average view percentage (75.68%) and average view duration (26s), maintaining 0.7674 audience watch ratio at 0.49 video progress.",
+      "action": "Maintain short, direct question setups with immediately visible A/B/C/D prompts to sustain audience watch ratio above 1.0 in the first 5 seconds."
     }
   ],
   "improvements": [
     {
-      "pattern": "Question complexity",
-      "evidence": "Recent trivia questions (e.g., hexagon sides, fastest land animal) are seeing zero engagement, likely due to low difficulty or lack of perceived 'challenge'.",
-      "action": "Pivot from 'Google-able' facts to counter-intuitive 'tricky' questions that benefit from a 5-second reveal."
+      "pattern": "Direct repetition of identical trivia prompts",
+      "evidence": "Question history reveals verbatim or near-verbatim duplication of questions (Müller-Lyer lines 3 times, ancient Greek inventions 4 times, landmark construction dates 3 times, country with most volcanoes 2 times).",
+      "action": "Enforce strict deduplication in topic selection; replace repeated questions with fresh, unexplored domain-specific paradoxes."
+    },
+    {
+      "pattern": "Zero-view publishing stall on consecutive uploads",
+      "evidence": "The 5 most recent videos published between 2026-09-11 and 2026-09-13 show 0 views, 0 likes, and 0 comments.",
+      "action": "Realign release schedules to proven engagement windows (12:05 UTC and 15:15 UTC) and avoid rapid back-to-back uploads with generic fallback titles."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "Physics/Logic Teasers",
+      "video_pattern": "Early-second audience retention drop-off on complex logic puzzles",
+      "drop_or_strength": "drop",
+      "evidence": "'The Flying Bird Physics Puzzle' showed a steep relative retention drop (starting at 0.1933 relative retention at 0.01 progress and dropping to 0.0494 at 0.49 progress, averaging 48.1% APV).",
+      "action": "Ensure the visual clue and question hook are instantly decodable within 1.5 seconds rather than requiring abstract mental modeling."
+    },
+    {
+      "video_pattern": "High initial re-watch and hook retention on visual trivia",
       "drop_or_strength": "strength",
-      "evidence": "High relative retention on videos like 'The Physics Ring Puzzle' vs. 'Guess the Toy'.",
-      "action": "Ensure the first 2 seconds immediately state the puzzle scenario visually rather than using slow verbal introductions."
+      "evidence": "'Quick geography challenge! Which is the largest ocean on Earth?' achieved an initial audience watch ratio of 1.2093 and relative retention of 0.6052, retaining 0.7674 watch ratio at mid-video (0.49 progress).",
+      "action": "Lead with bold, full-screen graphical contrast and high-stakes visual options right at progress 0.00."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Morning Peak",
-      "hour_utc": 7,
-      "minute_utc": 30,
-      "reason": "Strong performance noted in early morning slots (e.g., 07:38).",
-      "confidence": "medium"
+      "window": "Midday Peak Window (12:00 - 12:30 UTC)",
+      "hour_utc": 12,
+      "minute_utc": 5,
+      "reason": "The channel's highest-viewed video ('What Color Is a Sunset on Mars?', 450 views, 53 estimated minutes watched) was published at 12:05 UTC.",
+      "confidence": "low"
     },
     {
-      "window": "Midday Peak",
-      "hour_utc": 12,
-      "minute_utc": 45,
-      "reason": "Observed high publish frequency with stable early results in this block.",
-      "confidence": "medium"
+      "window": "Afternoon High-Engagement Window (15:00 - 15:30 UTC)",
+      "hour_utc": 15,
+      "minute_utc": 16,
+      "reason": "The top-converting video for engagement ('Which animal is known for changing its skin color...', 383 views, 25 likes, 1 comment, 1 subscriber) was published at 15:16 UTC.",
+      "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Physics/Intuition Trap",
-      "hook": "Can you spot the mistake? Why does [X] happen?",
-      "visual_type": "Side-by-side comparison or high-quality stock loop",
-      "reason": "Leverages the highest engagement patterns observed in the current dataset.",
-      "confidence": "medium"
+      "topic": "Planetary Atmosphere & Extreme Weather",
+      "hook": "Think fast: On which planet does it rain liquid glass sideways?",
+      "visual_type": "Deep-space exoplanet render with vivid cobalt blue storm graphics and clear 4-box A/B/C/D options",
+      "reason": "Space curiosity prompts generated the highest raw viewership (450 views on Mars quiz) and strong watch time.",
+      "confidence": "low"
+    },
+    {
+      "priority": 2,
+      "topic": "Surprising Animal Physiology",
+      "hook": "Only 5% know this: Which animal has blue blood and three hearts?",
+      "visual_type": "High-contrast macro ocean visual with glowing anatomical graphic and 5-second countdown timer",
+      "reason": "Animal trivia drove the highest engagement ratio (25 likes on 383 views) and proven subscriber acquisition.",
+      "confidence": "low"
+    },
+    {
+      "priority": 3,
+      "topic": "Physical World Extremes & Geography Paradoxes",
+      "hook": "Quick brain test: Which ocean trench is deep enough to submerge Mount Everest?",
+      "visual_type": "Side-by-side scale comparison infographic showing ocean depth vs. mountain altitude with A/B/C/D overlay",
+      "reason": "Geography challenge demonstrated channel-leading retention (75.68% APV, 26s AVD).",
+      "confidence": "low"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Simple definition-based trivia",
-      "reason": "These are searchable and do not encourage the 'guess-along' behavior required for Shorts algorithm success."
+      "item": "Duplicate Landmark and Optical Illusion questions",
+      "reason": "Question log shows 3 repetitions of landmark construction order and 3 repetitions of the Müller-Lyer line illusion, fatiguing repeat viewers."
     },
     {
-      "item": "Slow, text-heavy intros",
-      "reason": "Audience drops off quickly in the first 0-3 seconds; needs an instant visual hook."
+      "item": "Ancient Greek invention trivia themes",
+      "reason": "Invention questions around ancient Alexandria and Greece were recycled 4 times across recent history, risking channel stagnation."
+    },
+    {
+      "item": "Generic fallback title formulations without curiosity hooks",
+      "reason": "Formulas like 'Think before you choose!' and 'Can you beat the clock?' coincided with recent zero-view performance."
     }
   ],
-  "model_used": "gemini-3.1-flash-lite",
+  "model_used": "gemini-3.8-flash",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
   "owner_analytics_videos": 18,
-  "retention_videos": 11,
+  "retention_videos": 10,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,
