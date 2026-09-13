@@ -3,8 +3,8 @@ name: THINK FAST DAILY
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 7 * * *"
-    - cron: "45 12 * * *"
+    - cron: "5 12 * * *"
+    - cron: "15 15 * * *"
 
 permissions:
   contents: write
