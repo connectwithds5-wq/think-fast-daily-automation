@@ -304,5 +304,24 @@
     "category": "geography",
     "title": "Here's a sneaky geography test! Which continent is the Sahara Desert located in? #shorts",
     "source": "offline_fallback"
+  },
+  {
+    "question": "Which planet in our solar system reaches extreme surface temperatures capable of melting solid lead?",
+    "answer": "B",
+    "category": "guess the country",
+    "title": "Which Planet Can Melt Lead? 🌌 #Shorts"
+  },
+  {
+    "question": "Which planet in our solar system rotates on its side, rolling like a ball in its orbit?",
+    "answer": "C",
+    "category": "geography challenge",
+    "title": "Which Planet Rotates Sideways? Astronomy Quiz #shorts"
+  },
+  {
+    "question": "Which bird is famous for being unable to fly?",
+    "answer": "C",
+    "category": "animal",
+    "title": "Animal experts, your turn! Which bird is famous for being unable to fly? #shorts",
+    "source": "offline_fallback"
   }
 ]

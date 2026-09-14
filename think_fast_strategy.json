@@ -1,67 +1,75 @@
 {
-  "generated_at": "2026-09-14T07:51:03.927080+00:00",
-  "confidence": "low",
+  "generated_at": "2026-09-14T13:04:06.148259+00:00",
+  "confidence": "medium",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Performance is currently split between offline fallback trivia shorts receiving modest engagement (e.g., 539 views on the animal speed quiz) and recent uploads showing zero views, indicating algorithmic testing phases or distribution variance. Viewer retention shows typical quick drop-offs within the first 10% of videos, but higher relative retention is sustained in geography and space quizzes where instant visual cues or curiosity gaps are present.",
+  "overall_summary": "Initial performance data shows a strong correlation between simple, high-recognition trivia (Geography/Space) and higher retention. 'Quick' and 'Easy' concepts are currently outperforming abstract logic puzzles, suggesting the audience prefers instant gratification over prolonged mental effort.",
   "winning_patterns": [
     {
-      "pattern": "High-engagement animal and geography trivia",
-      "evidence": "The animal speed quiz generated 539 views and 29 likes, outperforming purely abstract math sequences or generic questions.",
-      "action": "Produce more fast-paced animal facts and distinct geography challenges with immediate visual choices."
+      "pattern": "Geography/Space high-level trivia",
+      "evidence": "Videos like 'Largest ocean' and 'Red Planet' maintain high average percentage watched compared to complex logic puzzles.",
+      "action": "Prioritize rapid-fire, high-recognition trivia categories to maintain velocity and viewer interest."
     }
   ],
   "improvements": [
     {
-      "pattern": "Overuse of basic fallback trivia categories",
-      "evidence": "Multiple fallback space and science shorts have stalled out at zero views in recent posting clusters.",
-      "action": "Introduce fresher framing, sharper curiosity gaps, and unique comparative angles rather than repeating standard planetary facts."
+      "pattern": "Longer setup time",
+      "evidence": "Retention curves show a steep drop-off within the first 5-10% of videos (the 'hook' phase).",
+      "action": "Reduce intro text and get to the A/B/C/D question within 1.5 seconds of the video start."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "Geography and Space Quizzes",
-      "drop_or_strength": "Strength",
-      "evidence": "Videos like 'Quick geography challenge! Which is the largest ocean on Earth?' maintained a higher average percentage watched (74.3%).",
-      "action": "Keep the initial hook under 2 seconds and present the multiple-choice options instantly to minimize early drop-off."
+      "video_pattern": "Standard trivia question",
+      "drop_or_strength": "strength",
+      "evidence": "Average view percentages peak near 50-75% for content like 'Largest Ocean'.",
+      "action": "Implement a 15-second loop format to encourage re-watches and boost algorithmic signals."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Morning Cluster",
+      "window": "Morning Peak",
       "hour_utc": 7,
-      "minute_utc": 40,
-      "reason": "Observed publish timestamps for prior content cluster around early morning UTC.",
-      "confidence": "low"
+      "minute_utc": 45,
+      "reason": "Aligned with early morning engagement observed in geography and science categories.",
+      "confidence": "medium"
     },
     {
-      "window": "Midday Cluster",
+      "window": "Mid-day Traffic",
       "hour_utc": 12,
-      "minute_utc": 55,
-      "reason": "Observed publish timestamps frequently land near midday UTC.",
-      "confidence": "low"
+      "minute_utc": 50,
+      "reason": "Consistent with strong performance in lunch-hour browsing patterns.",
+      "confidence": "medium"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Unusual Animal Behaviors",
-      "hook": "Most people guess this animal wrong in 3 seconds!",
-      "visual_type": "A/B/C/D animal comparison split-screen",
-      "reason": "Animal-based trivia has previously driven the highest like counts and engagement.",
-      "confidence": "low"
+      "topic": "Astronomy Trivia",
+      "hook": "Which planet is actually hot enough to melt lead?",
+      "visual_type": "Comparison graphic",
+      "reason": "Space-themed content currently shows the most consistent engagement.",
+      "confidence": "high"
+    },
+    {
+      "priority": 2,
+      "topic": "Geography Identification",
+      "hook": "Can you identify this country by its unique shape?",
+      "visual_type": "Map silhouette",
+      "reason": "Simple visual identification tasks align with top-performing retention trends.",
+      "confidence": "medium"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Basic number sequence math puzzles",
-      "reason": "Simple number sequences like powers of 2 yield low differentiation and weaker engagement compared to quirky science and geography."
+      "item": "Complex word-based logic puzzles",
+      "reason": "Lower retention rates indicate they require too much mental load for a short format."
     }
   ],
-  "model_used": "gemini-3.5-flash-lite",
+  "model_used": "gemini-3.1-flash-lite",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
   "owner_analytics_videos": 20,
-  "retention_videos": 10,
+  "retention_videos": 9,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,
