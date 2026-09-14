@@ -1,79 +1,67 @@
 {
-  "generated_at": "2026-09-13T15:23:58.254573+00:00",
+  "generated_at": "2026-09-14T07:51:03.927080+00:00",
   "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Performance is based on a limited set of measured outcomes, with recent uploads seeing zero views and older posts yielding modest interaction. Content focuses on quick quiz formats, space facts, and physics puzzles. Because fewer than 3 measured outcomes exist with robust analytics, confidence is kept low, prioritizing cautious and foundational growth steps.",
+  "overall_summary": "Performance is currently split between offline fallback trivia shorts receiving modest engagement (e.g., 539 views on the animal speed quiz) and recent uploads showing zero views, indicating algorithmic testing phases or distribution variance. Viewer retention shows typical quick drop-offs within the first 10% of videos, but higher relative retention is sustained in geography and space quizzes where instant visual cues or curiosity gaps are present.",
   "winning_patterns": [
     {
-      "pattern": "Space and astronomy themed quiz questions",
-      "evidence": "Videos like 'What Color Is a Sunset on Mars?' and 'Only sharp minds get this one! Which planet has the most prominent ring system?' achieved higher view counts and engagement relative to baseline.",
-      "action": "Continue producing accessible space and planetary trivia, but introduce fresh conceptual angles rather than direct repetitions."
+      "pattern": "High-engagement animal and geography trivia",
+      "evidence": "The animal speed quiz generated 539 views and 29 likes, outperforming purely abstract math sequences or generic questions.",
+      "action": "Produce more fast-paced animal facts and distinct geography challenges with immediate visual choices."
     }
   ],
   "improvements": [
     {
-      "pattern": "Recent zero-view uploads",
-      "evidence": "Multiple recent videos published on 2026-09-12 and 2026-09-13 registered 0 views.",
-      "action": "Review posting schedules, optimize tags/metadata, and ensure publishing aligns with active audience windows."
+      "pattern": "Overuse of basic fallback trivia categories",
+      "evidence": "Multiple fallback space and science shorts have stalled out at zero views in recent posting clusters.",
+      "action": "Introduce fresher framing, sharper curiosity gaps, and unique comparative angles rather than repeating standard planetary facts."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "Quick geography challenge / ocean quiz",
-      "drop_or_strength": "strength",
-      "evidence": "Average view percentage reached 75.68% with an average view duration of 26 seconds.",
-      "action": "Maintain fast-paced question setups with immediate visual clues to sustain high early retention."
+      "video_pattern": "Geography and Space Quizzes",
+      "drop_or_strength": "Strength",
+      "evidence": "Videos like 'Quick geography challenge! Which is the largest ocean on Earth?' maintained a higher average percentage watched (74.3%).",
+      "action": "Keep the initial hook under 2 seconds and present the multiple-choice options instantly to minimize early drop-off."
     }
   ],
   "best_posting_windows": [
     {
       "window": "Morning Cluster",
       "hour_utc": 7,
-      "minute_utc": 38,
-      "reason": "Observed early publishing cluster with solid performance outcomes.",
+      "minute_utc": 40,
+      "reason": "Observed publish timestamps for prior content cluster around early morning UTC.",
       "confidence": "low"
     },
     {
       "window": "Midday Cluster",
       "hour_utc": 12,
-      "minute_utc": 5,
-      "reason": "Observed midday publishing slot yielding strong view engagement.",
+      "minute_utc": 55,
+      "reason": "Observed publish timestamps frequently land near midday UTC.",
       "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Unusual astronomy and celestial phenomena",
-      "hook": "Can you spot the cosmic anomaly before time runs out?",
-      "visual_type": "Side-by-side planet comparison graphic with a clear timer",
-      "reason": "Builds on successful space quiz performance while introducing a fresh variation.",
-      "confidence": "low"
-    },
-    {
-      "priority": 2,
-      "topic": "Counter-intuitive physics brain teasers",
-      "hook": "This simple physics trap tricks 90% of adults!",
-      "visual_type": "Animated scale or moving object diagram",
-      "reason": "Leverages interest in puzzle-style mechanics without repeating previous questions.",
+      "topic": "Unusual Animal Behaviors",
+      "hook": "Most people guess this animal wrong in 3 seconds!",
+      "visual_type": "A/B/C/D animal comparison split-screen",
+      "reason": "Animal-based trivia has previously driven the highest like counts and engagement.",
       "confidence": "low"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Directly repeated basic trivia questions",
-      "reason": "Avoid copying past fallback formats like basic planet identification without a new twist to prevent audience fatigue."
-    },
-    {
-      "item": "Complex multi-step riddle setups",
-      "reason": "Long setups cause early drop-offs; prefer instantly understandable A/B/C/D challenges."
+      "item": "Basic number sequence math puzzles",
+      "reason": "Simple number sequences like powers of 2 yield low differentiation and weaker engagement compared to quirky science and geography."
     }
   ],
   "model_used": "gemini-3.5-flash-lite",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
-  "owner_analytics_videos": 18,
-  "retention_videos": 8,
+  "owner_analytics_videos": 20,
+  "retention_videos": 10,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,
