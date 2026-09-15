@@ -1,89 +1,67 @@
 {
-  "generated_at": "2026-09-15T07:58:12.828025+00:00",
+  "generated_at": "2026-09-15T13:02:38.684099+00:00",
   "confidence": "low",
   "analytics_source": "youtube_analytics_api",
-  "overall_summary": "Performance data spans multiple recent short-form quiz videos, with top-performing pieces like 'This animal question looks easy... Which animal is the fastest land animal?' pulling 713 views and an average view duration of 20 seconds. However, several recent uploads (published on September 13 and 14, 2026) currently sit at zero views, indicating early distribution lags or plateaued algorithmic testing. Engagement rates in terms of likes are solid on mid-tier hits, but comment and share metrics remain largely untapped. Since STRATEGY OUTCOME HISTORY is empty and sample size for measured retention/outcomes is limited, confidence is kept low.",
+  "overall_summary": "With fewer than three measured strategy outcomes available and several recent videos recording zero views due to initial rollout timing, confidence is currently low. Performance data indicates that broad, highly recognizable topics (animals, geography, basic science) with engaging hooks perform best in terms of view counts and viewer retention.",
   "winning_patterns": [
     {
-      "pattern": "High-accessibility animal and nature trivia",
-      "evidence": "The video 'This animal question looks easy... Which animal is the fastest land animal?' achieved 713 views, 38 likes, and 1 subscriber gain with a 20s average view duration.",
-      "action": "Produce fresh variations of accessible wildlife and natural science trivia with high initial visual cues."
-    },
-    {
-      "pattern": "Photosynthesis and basic ecological science hooks",
-      "evidence": "The video 'One tiny clue gives it away! Which gas do plants mainly absorb...' generated 312 views and an exceptional 42s average view duration (120.93% average view percentage).",
-      "action": "Incorporate subtle hints or 'tiny clues' in science questions to drive completion loops and replay value."
+      "pattern": "High-interest animal and geography queries",
+      "evidence": "Videos like 'This animal question looks easy... Which animal is the fastest land animal?' achieved the highest view count (713 views) and solid engagement (38 likes).",
+      "action": "Reinforce quick-fire animal and geography trivia questions with straightforward A/B/C/D choices."
     }
   ],
   "improvements": [
     {
-      "pattern": "Zero-view plateau on recent batches",
-      "evidence": "Uploads from September 13-14 (e.g., Sahara desert, flightless bird, number patterns) show 0 views, signaling possible saturation or weak early hook optimization.",
-      "action": "Vary hook styles, ensure high-contrast opening text frames, and test distinct posting intervals to escape initial distribution zero-locks."
-    },
-    {
-      "pattern": "Low comment engagement across almost all titles",
-      "evidence": "Nearly all measured entries show 0 comments despite steady view counts and likes.",
-      "action": "Include explicit community interaction prompts or slightly ambiguous multiple-choice options to spark debate in the comments."
+      "pattern": "Overly broad or generic phrasing in recent uploads",
+      "evidence": "Recent fallback titles have yielded 0 views during initial publishing windows, indicating a need for sharper, more curiosity-inducing hooks.",
+      "action": "Pair fundamental trivia questions with stronger curiosity gaps in the title and visual clues right at the start."
     }
   ],
   "retention_insights": [
     {
-      "video_pattern": "Animal & Science Trivia Shorts",
-      "drop_or_strength": "Strength in early hook retention",
-      "evidence": "Audience watch ratios stay above 1.0 through the first 10% of progress across top-performing assets like the cheetah and plant gas videos.",
-      "action": "Keep the first 2 seconds punchy with instant visual identification of the quiz subject."
+      "video_pattern": "Quick-fire science & photosynthesis trivia",
+      "drop_or_strength": "Strength",
+      "evidence": "The video 'One tiny clue gives it away! Which gas do plants mainly absorb...' maintained an average view percentage over 120% (42 seconds average view duration).",
+      "action": "Structure future science questions around a single revealing clue that encourages re-watching or extended dwell time."
     }
   ],
   "best_posting_windows": [
     {
-      "window": "Morning Rush Cluster",
+      "window": "Morning peak cluster",
       "hour_utc": 7,
-      "minute_utc": 40,
-      "reason": "Observed historical cluster around 07:38-07:55 yielding steady baseline visibility.",
+      "minute_utc": 45,
+      "reason": "Observed successful morning publishing timestamps cluster around 07:38 to 08:39 UTC.",
       "confidence": "low"
     },
     {
-      "window": "Midday Peak Cluster",
+      "window": "Midday peak cluster",
       "hour_utc": 12,
       "minute_utc": 55,
-      "reason": "Observed historical cluster around 12:56-12:58 corresponding to solid view conversions.",
+      "reason": "Observed high-performing uploads cluster consistently around 12:55 to 13:08 UTC.",
       "confidence": "low"
     }
   ],
   "next_best_quiz_directions": [
     {
       "priority": 1,
-      "topic": "Unusual Animal Behaviors",
-      "hook": "Most people get this wildlife fact totally wrong in 3 seconds!",
-      "visual_type": "Side-by-side animal comparison with a mystery silhouette",
-      "reason": "Animal formats have historically driven the highest view volume (713 views) and subscriber conversion.",
-      "confidence": "low"
-    },
-    {
-      "priority": 2,
-      "topic": "Everyday Physics & Nature Paradoxes",
-      "hook": "Can your brain solve this 5-second physics trap?",
-      "visual_type": "Clean animated graphic demonstrating the physical puzzle",
-      "reason": "Science and physics questions with counterintuitive answers successfully capture high watch duration.",
+      "topic": "Unique animal behaviors",
+      "hook": "Most people get this weird wildlife fact totally wrong!",
+      "visual_type": "Side-by-side comparison with an instant visual clue",
+      "reason": "Animal trivia consistently drives the highest view counts and likes across the channel.",
       "confidence": "low"
     }
   ],
   "avoid_or_limit": [
     {
-      "item": "Repeated standard geography/planet basics without a unique twist",
-      "reason": "Basic questions published recently have shown high vulnerability to zero-view distribution stalls."
-    },
-    {
-      "item": "Static text-only intros without a dynamic visual clue",
-      "reason": "Shorts require immediate motion or visual framing in the first second to prevent swipe-aways."
+      "item": "Dry, textbook science definitions without visual context",
+      "reason": "Plain definitions lower initial engagement and retention compared to paradoxical or puzzle-style questions."
     }
   ],
   "model_used": "gemini-3.5-flash-lite",
   "data_source": "youtube_analytics_api",
   "data_points": 15,
   "owner_analytics_videos": 22,
-  "retention_videos": 10,
+  "retention_videos": 8,
   "learning_records": 0,
   "learning_outcomes": {
     "WIN": 0,
